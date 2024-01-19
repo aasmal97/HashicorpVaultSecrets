@@ -1,8 +1,12 @@
 import * as core from "@actions/core";
 import { execShellCommand } from "../utils/execShellCommand";
 import { generateEnvFile } from "../utils/generateEnv";
-import { getSecretNames, runCommand } from "../utils/getSecretNames";
-import { HashiCorpAuthOptions } from "./types";
+import {
+  generateSecretsConfigCommand,
+  getSecretNames,
+  runCommand,
+} from "../utils/getSecretNames";
+import { HashiCorpAuthOptions, HashiCorpConfigOptions } from "./types";
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -13,6 +17,7 @@ export const getInputs = () => {
   const projectName = core.getInput("PROJECT_NAME");
   const appName = core.getInput("APP_NAME");
   const secretsNames = JSON.parse(core.getInput("SECRET_NAMES")) as string[];
+  const organizationName = core.getInput("ORGANIZATION_NAME");
   const generateEnv = core.getInput("GENERATE_ENV");
   core.info("Inputs Parsed");
   return {
@@ -22,6 +27,7 @@ export const getInputs = () => {
     appName,
     secretsNames,
     generateEnv,
+    organizationName,
   };
 };
 export const installHashiCorp = async () => {
@@ -44,8 +50,14 @@ export const installHashiCorp = async () => {
     core.error(JSON.stringify(error));
   }
 };
-const generateSecretsMap = (auth: HashiCorpAuthOptions) => {
-  const secretsList = getSecretNames(auth);
+const generateSecretsMap = ({
+  auth,
+  config,
+}: {
+  auth: HashiCorpAuthOptions;
+  config: HashiCorpConfigOptions;
+}) => {
+  const secretsList = getSecretNames(auth, config);
   const secretsMap = Object.assign(
     {},
     ...secretsList.map((name) => ({ [name]: null }))
@@ -53,14 +65,17 @@ const generateSecretsMap = (auth: HashiCorpAuthOptions) => {
   core.info("Secrets Map Generated");
   return secretsMap;
 };
-export const extractSecrets = async (
-  secretNames: string[],
-  auth: {
-    clientId: string;
-    clientSecret: string;
-  }
-): Promise<[string, { [key: string]: string }]> => {
-  const secretsMap = generateSecretsMap(auth);
+export const extractSecrets = async ({
+  secretNames,
+  auth,
+  config,
+}: {
+  secretNames: string[];
+  config: HashiCorpConfigOptions;
+  auth: HashiCorpAuthOptions;
+}): Promise<[string, { [key: string]: string }]> => {
+  const secretsMap = generateSecretsMap({ config, auth });
+  const configCommand = generateSecretsConfigCommand(config);
   const contentArrPromise: Promise<
     [{ [key: string]: string }, string] | null
   >[] = [];
@@ -71,12 +86,15 @@ export const extractSecrets = async (
     > => {
       if (!(name in secretsMap)) return null;
       //we have this delay so we don't exceed our rate limit of 5-10 requests per second
-      const value = runCommand(`vlt secrets get --plaintext ${name}`, {
-        env: {
-          HCP_CLIENT_ID: auth.clientId,
-          HCP_CLIENT_SECRET: auth.clientSecret,
-        },
-      });
+      const value = runCommand(
+        `vlt secrets get --plaintext ${name} ${configCommand}`,
+        {
+          env: {
+            HCP_CLIENT_ID: auth.clientId,
+            HCP_CLIENT_SECRET: auth.clientSecret,
+          },
+        }
+      );
       if (!value) return null;
       return [
         { [name]: value.replace("\n", "") },
@@ -112,10 +130,19 @@ export const main = async () => {
     appName,
     secretsNames,
     generateEnv,
+    organizationName,
   } = inputs;
-  const [content, output] = await extractSecrets(secretsNames, {
-    clientId,
-    clientSecret,
+  const [content, output] = await extractSecrets({
+    secretNames: secretsNames,
+    config: {
+      appName,
+      projectName,
+      organizationName,
+    },
+    auth: {
+      clientId,
+      clientSecret,
+    },
   });
   if (generateEnv) generateEnvFile(generateEnv, content);
   core.info("Finished secrets generation");

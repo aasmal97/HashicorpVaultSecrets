@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import { findPackageJson } from "./execShellCommand";
-import { HashiCorpAuthOptions } from "../action/types";
+import { HashiCorpAuthOptions, HashiCorpConfigOptions } from "../action/types";
 export function runCommand(
   command: string,
   options?: {
@@ -22,12 +22,27 @@ export function runCommand(
     return null;
   }
 }
+export const generateSecretsConfigCommand = (
+  config: HashiCorpConfigOptions
+) => {
+  const argumentsArr = [];
+  if (config.organizationName)
+    argumentsArr.push("--organization", config.organizationName);
+  if (config.projectName) argumentsArr.push("--project", config.projectName);
+  if (config.appName) argumentsArr.push("--app-name", config.appName);
+  const command = argumentsArr.join(" ");
+  return command;
+};
 //This function handles the two versions of this command
 // One has secrets, the other secrets list
-const getSecrets = (auth: HashiCorpAuthOptions) => {
+const getSecrets = (
+  auth: HashiCorpAuthOptions,
+  config: HashiCorpConfigOptions
+) => {
   const packageJsonPath = findPackageJson(__dirname);
   if (!packageJsonPath) return null;
-  const command = `vlt secrets`;
+  const configCommand = generateSecretsConfigCommand(config);
+  const command = `vlt secrets ${configCommand}`;
   let output = runCommand(command, {
     cwd: packageJsonPath,
     env: {
@@ -36,7 +51,7 @@ const getSecrets = (auth: HashiCorpAuthOptions) => {
     },
   });
   if (!output) {
-    const command = `vlt secrets list`;
+    const command = `vlt secrets list ${configCommand}`;
     output = runCommand(command, {
       cwd: packageJsonPath,
       env: {
@@ -48,11 +63,11 @@ const getSecrets = (auth: HashiCorpAuthOptions) => {
   }
   return output;
 };
-export const getSecretNames = (auth: {
-  clientId: string;
-  clientSecret: string;
-}) => {
-  const output = getSecrets(auth);
+export const getSecretNames = (
+  auth: HashiCorpAuthOptions,
+  config: HashiCorpConfigOptions
+) => {
+  const output = getSecrets(auth, config);
   if (!output) return [];
   const lines = output.split("\n");
   const secretNames = lines.slice(1, lines.length).map((line) => {

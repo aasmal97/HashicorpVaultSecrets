@@ -16,4 +16,4 @@ jobs:
           CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
           APP_NAME: ${{secrets.APP_NAME}}
           PROJECT_NAME: ${{secrets.PROJECT_NAME}}
-          SECRET_NAMES: '["VERCEL_ORG_ID", "VERCEL_PROJECT_ID"]'
+          SECRET_NAMES: ${{secrets.SECRET_NAMES}}

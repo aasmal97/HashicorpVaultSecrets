@@ -18926,11 +18926,23 @@ function runCommand(command, options) {
     return null;
   }
 }
-var getSecrets = (auth) => {
+var generateSecretsConfigCommand = (config) => {
+  const argumentsArr = [];
+  if (config.organizationName)
+    argumentsArr.push("--organization", config.organizationName);
+  if (config.projectName)
+    argumentsArr.push("--project", config.projectName);
+  if (config.appName)
+    argumentsArr.push("--app-name", config.appName);
+  const command = argumentsArr.join(" ");
+  return command;
+};
+var getSecrets = (auth, config) => {
   const packageJsonPath = findPackageJson(__dirname);
   if (!packageJsonPath)
     return null;
-  const command = `vlt secrets`;
+  const configCommand = generateSecretsConfigCommand(config);
+  const command = `vlt secrets ${configCommand}`;
   let output = runCommand(command, {
     cwd: packageJsonPath,
     env: {
@@ -18939,7 +18951,7 @@ var getSecrets = (auth) => {
     }
   });
   if (!output) {
-    const command2 = `vlt secrets list`;
+    const command2 = `vlt secrets list ${configCommand}`;
     output = runCommand(command2, {
       cwd: packageJsonPath,
       env: {
@@ -18952,8 +18964,8 @@ var getSecrets = (auth) => {
   }
   return output;
 };
-var getSecretNames = (auth) => {
-  const output = getSecrets(auth);
+var getSecretNames = (auth, config) => {
+  const output = getSecrets(auth, config);
   if (!output)
     return [];
   const lines = output.split("\n");
@@ -18977,6 +18989,7 @@ var getInputs = () => {
   const projectName = core.getInput("PROJECT_NAME");
   const appName = core.getInput("APP_NAME");
   const secretsNames = JSON.parse(core.getInput("SECRET_NAMES"));
+  const organizationName = core.getInput("ORGANIZATION_NAME");
   const generateEnv = core.getInput("GENERATE_ENV");
   core.info("Inputs Parsed");
   return {
@@ -18985,7 +18998,8 @@ var getInputs = () => {
     projectName,
     appName,
     secretsNames,
-    generateEnv
+    generateEnv,
+    organizationName
   };
 };
 var installHashiCorp = async () => {
@@ -19007,8 +19021,11 @@ var installHashiCorp = async () => {
     core.error(JSON.stringify(error2));
   }
 };
-var generateSecretsMap = (auth) => {
-  const secretsList = getSecretNames(auth);
+var generateSecretsMap = ({
+  auth,
+  config
+}) => {
+  const secretsList = getSecretNames(auth, config);
   const secretsMap = Object.assign(
     {},
     ...secretsList.map((name) => ({ [name]: null }))
@@ -19016,20 +19033,28 @@ var generateSecretsMap = (auth) => {
   core.info("Secrets Map Generated");
   return secretsMap;
 };
-var extractSecrets = async (secretNames, auth) => {
-  const secretsMap = generateSecretsMap(auth);
+var extractSecrets = async ({
+  secretNames,
+  auth,
+  config
+}) => {
+  const secretsMap = generateSecretsMap({ config, auth });
+  const configCommand = generateSecretsConfigCommand(config);
   const contentArrPromise = [];
   for (let name of secretNames) {
     await delay(200);
     const getSecret = async () => {
       if (!(name in secretsMap))
         return null;
-      const value = runCommand(`vlt secrets get --plaintext ${name}`, {
-        env: {
-          HCP_CLIENT_ID: auth.clientId,
-          HCP_CLIENT_SECRET: auth.clientSecret
+      const value = runCommand(
+        `vlt secrets get --plaintext ${name} ${configCommand}`,
+        {
+          env: {
+            HCP_CLIENT_ID: auth.clientId,
+            HCP_CLIENT_SECRET: auth.clientSecret
+          }
         }
-      });
+      );
       if (!value)
         return null;
       return [
@@ -19064,11 +19089,20 @@ var main = async () => {
     projectName,
     appName,
     secretsNames,
-    generateEnv
+    generateEnv,
+    organizationName
   } = inputs;
-  const [content, output] = await extractSecrets(secretsNames, {
-    clientId,
-    clientSecret
+  const [content, output] = await extractSecrets({
+    secretNames: secretsNames,
+    config: {
+      appName,
+      projectName,
+      organizationName
+    },
+    auth: {
+      clientId,
+      clientSecret
+    }
   });
   if (generateEnv)
     generateEnvFile(generateEnv, content);
