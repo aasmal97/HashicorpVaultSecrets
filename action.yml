@@ -19,7 +19,7 @@ inputs:
     description: Name of app deployed on HashiCorp Cloud Platform, using HashiCorp Vault Secrets
     required: true
   SECRET_NAMES: 
-    default: '[]'
+    default: "[]"
     description: a list of secret names, in an app using HashiCorp Vault Secrets
     required: true
   GENERATE_ENV:

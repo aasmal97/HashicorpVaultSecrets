@@ -11,10 +11,3 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Test HashiCorp Vault Secrets Script"
         uses: ./
-        # with:
-        #   CLIENT_ID: ${{ secrets.Hello  }}
-        #   CLIENT_SECRET: ${{}}
-        #   PROJECT_NAME:
-        #   APP_NAME:
-        #   SECRET_NAMES:
-        #   GENERATE_ENV:
