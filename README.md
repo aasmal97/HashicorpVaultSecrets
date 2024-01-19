@@ -1,10 +1,10 @@
 # Hashicorp Vault Secrets Github Action
 ## Introduction
-Currently, Hashicorp Vault Secrets has a direct one-click intergation that links a Github Repo to an app of their choosing. 
+Currently, [Hashicorp Vault Secrets](https://developer.hashicorp.com/hcp/docs/vault-secrets) has a direct one-click intergation that links a Github Repo to an app of their choosing. 
 
-However, as highlighted by their [documentation](https://developer.hashicorp.com/hcp/docs/vault-secrets/integrations/github-actions), there are severe limitations, like syncing secrets from a single HCP project, or syncing to a single organization with the repo. In addition, this integration requires the Hashicorp Vault Secrets App to be installed and configured in your repo, which may not be possible if the repo lives in an organization, and you are not an organization owner/admin. 
+However, as highlighted by their [documentation](https://developer.hashicorp.com/hcp/docs/vault-secrets/integrations/github-actions), there are severe limitations, like syncing secrets from a single Hashicorp Cloud Platform project, or syncing to a single organization with the repo. In addition, this integration requires the Hashicorp Vault Secrets App to be installed and configured in your repo, which may not be possible if the repo lives in an organization, and you are not an organization owner/admin. 
 
-This action provides a solution for the aforementioned problems, by using a service principal on your HashiCorp Organization account, to programmatically access Hashicorp Vault secrets in a Github action runner, and pass them into your workflows.
+This action provides a solution for the aforementioned problems, by using a service principal on your HashiCorp Cloud Platform account, to programmatically access Hashicorp Vault secrets in a Github action runner, and pass them into your workflows.
 ## Configuring a Service Principal 
 ### Requirements:
 - You must be using an HCP Vault Secrets App
@@ -92,7 +92,10 @@ steps:
     fi
   
 ```
-
+## Limitations
+- The service principal account must be configured at the **Organization Level**. This a limitation is imposed by Hashicorp themselves, and until this changes, there can't be support for more granular access (i.e service principal for only a project). 
+- The `SECRET_NAMES` must be a string since list inputs are not supported by Github Actions. In the future, this may be changed, when Github supports list inputs natively. 
+- This action can only run in **Linux**, and has been tested in ubuntu environments. It is not supported in darwin or mac. This is due primarily to ubuntu being the most common environment for Github action runners, but it is also due to my lack of hardware and time. However, in the future, support can be added if it is seen as a good or necessary feature. 
 ## Contributing
 Anyone is welcome to contribute, simply open an issue or pull request. When opening an issue, ensure you can reproduce the issue, and list the steps you took to reproduce it.
 
