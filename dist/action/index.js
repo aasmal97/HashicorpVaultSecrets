@@ -18919,7 +18919,7 @@ var installHashiCorp = async () => {
     );
     await execShellCommand("sudo apt update");
     await execShellCommand("sudo apt install vlt -y");
-    await execShellCommand("vlt");
+    await execShellCommand("vlt --version");
     core.info("HashiCorp Vault Installed");
   } catch (error2) {
     core.error(JSON.stringify(error2));

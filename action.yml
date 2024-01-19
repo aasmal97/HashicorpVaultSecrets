@@ -23,8 +23,8 @@ inputs:
     description: a list of secret names, in an app using HashiCorp Vault Secrets
     required: true
   GENERATE_ENV:
-    default: 'false'
-    description: a boolean value, that determines whether to generate .env file or not. By default, this is set to false.
+    default: ''
+    description: The name of the .env file to be generated. If not set, no .env is generated. By default this is not set.
     required: false
 runs: 
   using: 'node20'
