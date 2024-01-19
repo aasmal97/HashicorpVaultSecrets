@@ -67,7 +67,7 @@ steps:
         SECRET_NAMES: '["EXAMPLE_ID"]'
 
 -   name: Example Step
-    run: echo "The output value is ${{ steps.hashicorp-vault-secrets.outputs.secrets }}"
+    run: echo "The output value is ${{ steps.hashicorp-vault-secrets.outputs.EXAMPLE_ID }}"
 ```
 #### Using a generated .env file 
 To use this, you must use the `GENERATE_ENV` input.

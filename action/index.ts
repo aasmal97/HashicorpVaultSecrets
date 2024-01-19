@@ -53,6 +53,11 @@ export const main = async () => {
 
   if (generateEnv) generateEnvFile(generateEnv, content);
   core.info("Finished secrets generation");
-  core.setOutput("secrets", output);
+  Object.keys(output).forEach((key) => {
+    //mask the value
+    core.setSecret(output[key]);
+    //set output
+    core.setOutput(key, output[key]);
+  });
 };
 main();

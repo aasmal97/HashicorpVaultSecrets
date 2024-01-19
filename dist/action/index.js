@@ -18707,10 +18707,10 @@ var require_core = __commonJS({
       command_1.issueCommand("set-env", { name }, convertedVal);
     }
     exports2.exportVariable = exportVariable;
-    function setSecret(secret) {
+    function setSecret2(secret) {
       command_1.issueCommand("add-mask", {}, secret);
     }
-    exports2.setSecret = setSecret;
+    exports2.setSecret = setSecret2;
     function addPath(inputPath) {
       const filePath = process.env["GITHUB_PATH"] || "";
       if (filePath) {
@@ -19093,7 +19093,10 @@ var main = async () => {
   if (generateEnv)
     generateEnvFile(generateEnv, content);
   core3.info("Finished secrets generation");
-  core3.setOutput("secrets", output);
+  Object.keys(output).forEach((key) => {
+    core3.setSecret(output[key]);
+    core3.setOutput(key, output[key]);
+  });
 };
 main();
 // Annotate the CommonJS export names for ESM import in node:
