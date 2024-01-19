@@ -11,6 +11,7 @@ export function execShellCommand(cmd: string, cwd?: string) {
       (error, stdout, stderr) => {
         if (error) {
           console.warn(error);
+          reject(error);
         }
         const output = stdout ? stdout : stderr;
         console.log(output);

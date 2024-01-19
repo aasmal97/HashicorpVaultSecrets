@@ -18877,6 +18877,7 @@ function execShellCommand(cmd, cwd) {
       (error2, stdout, stderr) => {
         if (error2) {
           console.warn(error2);
+          reject(error2);
         }
         const output = stdout ? stdout : stderr;
         console.log(output);
@@ -18914,7 +18915,7 @@ var installHashiCorp = async () => {
       "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
     );
     await execShellCommand(
-      "echo 'deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main' | sudo tee /etc/apt/sources.list.d/hashicorp.list"
+      `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
     );
     await execShellCommand("sudo apt update");
     await execShellCommand("sudo apt install vlt -y");
