@@ -26,25 +26,15 @@ const getSecrets = (
   const packageJsonPath = findPackageJson(__dirname);
   if (!packageJsonPath) return null;
   const configCommand = generateSecretsConfigCommand(config);
-  const command = `vlt secrets ${configCommand}`;
-  let output = runCommand(command, {
+  const command = `vlt secrets list ${configCommand}`;
+  const output = runCommand(command, {
     cwd: packageJsonPath,
     env: {
       HCP_CLIENT_ID: auth.clientId,
       HCP_CLIENT_SECRET: auth.clientSecret,
     },
   });
-  if (!output) {
-    const command = `vlt secrets list ${configCommand}`;
-    output = runCommand(command, {
-      cwd: packageJsonPath,
-      env: {
-        HCP_CLIENT_ID: auth.clientId,
-        HCP_CLIENT_SECRET: auth.clientSecret,
-      },
-    });
-    if (!output) return null;
-  }
+  if (!output) return null;
   return output;
 };
 export const getSecretNames = (
@@ -99,7 +89,7 @@ export const extractSecrets = async ({
       if (!(name in secretsMap)) return null;
       //we have this delay so we don't exceed our rate limit of 5-10 requests per second
       const value = runCommand(
-        `vlt secrets get --plaintext ${name} ${configCommand}`,
+        `vlt secrets get ${configCommand} --plaintext ${name}`,
         {
           env: {
             HCP_CLIENT_ID: auth.clientId,
@@ -126,9 +116,6 @@ export const extractSecrets = async ({
   ][];
   if (filteredContentArr.length === 0) return ["", {}];
   const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
-  const lineMap = filteredContentArr.reduce(
-    (a, b) => ({ ...a, ...b[0] }),
-    {}
-  );
+  const lineMap = filteredContentArr.reduce((a, b) => ({ ...a, ...b[0] }), {});
   return [content, lineMap];
 };

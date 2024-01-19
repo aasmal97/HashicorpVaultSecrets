@@ -18902,7 +18902,6 @@ function runCommand(command, options) {
       shell: "/bin/bash"
     });
     const output = outputBuffer.toString();
-    console.log(output);
     return output;
   } catch (error2) {
     console.log(JSON.stringify(error2.output[1].toString()));
@@ -18932,26 +18931,16 @@ var getSecrets = (auth, config) => {
   if (!packageJsonPath)
     return null;
   const configCommand = generateSecretsConfigCommand(config);
-  const command = `vlt secrets ${configCommand}`;
-  let output = runCommand(command, {
+  const command = `vlt secrets list ${configCommand}`;
+  const output = runCommand(command, {
     cwd: packageJsonPath,
     env: {
       HCP_CLIENT_ID: auth.clientId,
       HCP_CLIENT_SECRET: auth.clientSecret
     }
   });
-  if (!output) {
-    const command2 = `vlt secrets list ${configCommand}`;
-    output = runCommand(command2, {
-      cwd: packageJsonPath,
-      env: {
-        HCP_CLIENT_ID: auth.clientId,
-        HCP_CLIENT_SECRET: auth.clientSecret
-      }
-    });
-    if (!output)
-      return null;
-  }
+  if (!output)
+    return null;
   return output;
 };
 var getSecretNames = (auth, config) => {
@@ -18993,7 +18982,7 @@ var extractSecrets = async ({
       if (!(name in secretsMap))
         return null;
       const value = runCommand(
-        `vlt secrets get --plaintext ${name} ${configCommand}`,
+        `vlt secrets get ${configCommand} --plaintext ${name}`,
         {
           env: {
             HCP_CLIENT_ID: auth.clientId,
@@ -19020,10 +19009,7 @@ var extractSecrets = async ({
   if (filteredContentArr.length === 0)
     return ["", {}];
   const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
-  const lineMap = filteredContentArr.reduce(
-    (a, b) => ({ ...a, ...b[0] }),
-    {}
-  );
+  const lineMap = filteredContentArr.reduce((a, b) => ({ ...a, ...b[0] }), {});
   return [content, lineMap];
 };
 
@@ -19039,9 +19025,7 @@ var installHashiCorpCommands = [
   `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`,
   "sudo apt update",
   "sudo apt install vlt -y",
-  "vlt --version",
-  "ls",
-  "env"
+  "vlt --version"
 ];
 var installHashiCorp = (auth) => {
   core2.info("Installing HashiCorp Vault");

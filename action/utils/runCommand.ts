@@ -20,7 +20,6 @@ export function runCommand(
     });
     // Convert the output Buffer to a string and return it
     const output = outputBuffer.toString();
-    console.log(output);
     return output;
   } catch (error: any) {
     console.log(JSON.stringify(error.output[1].toString()));

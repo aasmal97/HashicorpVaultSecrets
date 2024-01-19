@@ -12,8 +12,6 @@ export const installHashiCorpCommands = [
   "sudo apt update",
   "sudo apt install vlt -y",
   "vlt --version",
-  "ls",
-  "env"
 ];
 export const installHashiCorp = (auth: HashiCorpAuthOptions) => {
   core.info("Installing HashiCorp Vault");
