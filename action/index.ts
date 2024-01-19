@@ -1,5 +1,10 @@
 import * as core from "@actions/core";
 import { execShellCommand } from "../utils/execShellCommand";
+import { generateEnvFile } from "../utils/generateEnv";
+import { getSecretNames, runCommand } from "../utils/getSecretNames";
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 export const getInputs = () => {
   core.info("Getting Inputs");
   const clientId = core.getInput("CLIENT_ID");
@@ -7,7 +12,7 @@ export const getInputs = () => {
   const projectName = core.getInput("PROJECT_NAME");
   const appName = core.getInput("APP_NAME");
   const secretsNames = JSON.parse(core.getInput("SECRET_NAMES")) as string[];
-  const generateEnv = new Boolean(core.getInput("GENERATE_ENV"));
+  const generateEnv = core.getInput("GENERATE_ENV");
   core.info("Inputs Parsed");
   return {
     clientId,
@@ -51,6 +56,55 @@ export const authenticateHashiCorp = async (
     core.error(JSON.stringify(error));
   }
 };
+const generateSecretsMap = () => {
+  const secretsList = getSecretNames();
+  const secretsMap = Object.assign(
+    {},
+    ...secretsList.map((name) => ({ [name]: null }))
+  );
+  core.info("Secrets Map Generated");
+  return secretsMap;
+};
+export const extractSecrets = async (
+  secretNames: string[]
+): Promise<[string, { [key: string]: string }]> => {
+  const secretsMap = generateSecretsMap();
+  const contentArrPromise: Promise<
+    [{ [key: string]: string }, string] | null
+  >[] = [];
+  for (let name of secretNames) {
+    await delay(200);
+    const getSecret = async (): Promise<
+      [{ [key: string]: string }, string] | null
+    > => {
+      if (!(name in secretsMap)) return null;
+      //we have this delay so we don't exceed our rate limit of 5-10 requests per second
+      const value = runCommand(`vlt secrets get --plaintext ${name}`);
+      if (!value) return null;
+      return [
+        { [name]: value.replace("\n", "") },
+        name + "=" + `"${value.replace("\n", "")}"\n`,
+      ];
+    };
+    contentArrPromise.push(getSecret());
+  }
+  const contentArr = await Promise.all(contentArrPromise);
+  //log all errors from secrets
+  contentArr.forEach((val, idx) => {
+    if (!val) core.info(`Error getting secret ${secretNames[idx]}`);
+  });
+  const filteredContentArr = contentArr.filter((val) => val) as [
+    { [key: string]: string },
+    string
+  ][];
+  if (filteredContentArr.length === 0) return ["", {}];
+  const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
+  const lineMap = filteredContentArr.reduce(
+    (a, b) => ({ ...a[0], ...b[0] }),
+    {}
+  );
+  return [content, lineMap];
+};
 export const main = async () => {
   await installHashiCorp();
   const inputs = getInputs();
@@ -63,6 +117,12 @@ export const main = async () => {
     generateEnv,
   } = inputs;
   await authenticateHashiCorp(clientId, clientSecret);
+  
+  const [content, output] = await extractSecrets(secretsNames);
+  if (generateEnv) generateEnvFile(generateEnv, content);
+  //remove credential access
+  await execShellCommand("vlt logout");
+  core.info("Finished secrets generation");
+  core.setOutput("secrets", output);
 };
-
 main();

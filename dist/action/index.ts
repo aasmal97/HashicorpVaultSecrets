@@ -519,7 +519,7 @@ var require_file_command = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.prepareKeyValueMessage = exports2.issueFileCommand = void 0;
-    var fs3 = __importStar(require("fs"));
+    var fs = __importStar(require("fs"));
     var os = __importStar(require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
@@ -528,10 +528,10 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs3.existsSync(filePath)) {
+      if (!fs.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+      fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -1205,14 +1205,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol}//${url.hostname}:${port}`;
-        let path2 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin.endsWith("/")) {
           origin = origin.substring(0, origin.length - 1);
         }
-        if (path2 && !path2.startsWith("/")) {
-          path2 = `/${path2}`;
+        if (path && !path.startsWith("/")) {
+          path = `/${path}`;
         }
-        url = new URL(origin + path2);
+        url = new URL(origin + path);
       }
       return url;
     }
@@ -1570,9 +1570,9 @@ var require_timers = __commonJS({
       }
     }
     var Timeout = class {
-      constructor(callback, delay2, opaque) {
+      constructor(callback, delay, opaque) {
         this.callback = callback;
-        this.delay = delay2;
+        this.delay = delay;
         this.opaque = opaque;
         this.state = -2;
         this.refresh();
@@ -1591,8 +1591,8 @@ var require_timers = __commonJS({
       }
     };
     module2.exports = {
-      setTimeout(callback, delay2, opaque) {
-        return delay2 < 1e3 ? setTimeout(callback, delay2, opaque) : new Timeout(callback, delay2, opaque);
+      setTimeout(callback, delay, opaque) {
+        return delay < 1e3 ? setTimeout(callback, delay, opaque) : new Timeout(callback, delay, opaque);
       },
       clearTimeout(timeout) {
         if (timeout instanceof Timeout) {
@@ -2824,19 +2824,19 @@ var require_parseParams = __commonJS({
 var require_basename = __commonJS({
   "node_modules/@fastify/busboy/lib/utils/basename.js"(exports2, module2) {
     "use strict";
-    module2.exports = function basename(path2) {
-      if (typeof path2 !== "string") {
+    module2.exports = function basename(path) {
+      if (typeof path !== "string") {
         return "";
       }
-      for (var i = path2.length - 1; i >= 0; --i) {
-        switch (path2.charCodeAt(i)) {
+      for (var i = path.length - 1; i >= 0; --i) {
+        switch (path.charCodeAt(i)) {
           case 47:
           case 92:
-            path2 = path2.slice(i + 1);
-            return path2 === ".." || path2 === "." ? "" : path2;
+            path = path.slice(i + 1);
+            return path === ".." || path === "." ? "" : path;
         }
       }
-      return path2 === ".." || path2 === "." ? "" : path2;
+      return path === ".." || path === "." ? "" : path;
     };
   }
 });
@@ -5814,7 +5814,7 @@ var require_request = __commonJS({
     }
     var Request = class _Request {
       constructor(origin, {
-        path: path2,
+        path,
         method,
         body,
         headers,
@@ -5828,11 +5828,11 @@ var require_request = __commonJS({
         throwOnError,
         expectContinue
       }, handler) {
-        if (typeof path2 !== "string") {
+        if (typeof path !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path2[0] !== "/" && !(path2.startsWith("http://") || path2.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path[0] !== "/" && !(path.startsWith("http://") || path.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.exec(path2) !== null) {
+        } else if (invalidPathRegex.exec(path) !== null) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -5895,7 +5895,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? util.buildURL(path2, query) : path2;
+        this.path = query ? util.buildURL(path, query) : path;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -6912,9 +6912,9 @@ var require_RedirectHandler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path2 = search ? `${pathname}${search}` : pathname;
+        const path = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path2;
+        this.opts.path = path;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -8144,7 +8144,7 @@ var require_client = __commonJS({
         writeH2(client, client[kHTTP2Session], request);
         return;
       }
-      const { body, method, path: path2, host, upgrade, headers, blocking, reset } = request;
+      const { body, method, path, host, upgrade, headers, blocking, reset } = request;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
         body.read(0);
@@ -8194,7 +8194,7 @@ var require_client = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path2} HTTP/1.1\r
+      let header = `${method} ${path} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -8257,7 +8257,7 @@ upgrade: ${upgrade}\r
       return true;
     }
     function writeH2(client, session, request) {
-      const { body, method, path: path2, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      const { body, method, path, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
       let headers;
       if (typeof reqHeaders === "string")
         headers = Request[kHTTP2CopyHeaders](reqHeaders.trim());
@@ -8303,7 +8303,7 @@ upgrade: ${upgrade}\r
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path2;
+      headers[HTTP2_HEADER_PATH] = path;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -10536,20 +10536,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path2) {
-      if (typeof path2 !== "string") {
-        return path2;
+    function safeUrl(path) {
+      if (typeof path !== "string") {
+        return path;
       }
-      const pathSegments = path2.split("?");
+      const pathSegments = path.split("?");
       if (pathSegments.length !== 2) {
-        return path2;
+        return path;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path2, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path2);
+    function matchKey(mockDispatch2, { path, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10567,7 +10567,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path2 }) => matchValue(safeUrl(path2), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path }) => matchValue(safeUrl(path), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10604,9 +10604,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path2, method, body, headers, query } = opts;
+      const { path, method, body, headers, query } = opts;
       return {
-        path: path2,
+        path,
         method,
         body,
         headers,
@@ -10637,7 +10637,7 @@ var require_mock_utils = __commonJS({
       if (mockDispatch2.data.callback) {
         mockDispatch2.data = { ...mockDispatch2.data, ...mockDispatch2.data.callback(opts) };
       }
-      const { data: { statusCode, data, headers, trailers, error: error2 }, delay: delay2, persist } = mockDispatch2;
+      const { data: { statusCode, data, headers, trailers, error: error2 }, delay, persist } = mockDispatch2;
       const { timesInvoked, times } = mockDispatch2;
       mockDispatch2.consumed = !persist && timesInvoked >= times;
       mockDispatch2.pending = timesInvoked < times;
@@ -10646,10 +10646,10 @@ var require_mock_utils = __commonJS({
         handler.onError(error2);
         return true;
       }
-      if (typeof delay2 === "number" && delay2 > 0) {
+      if (typeof delay === "number" && delay > 0) {
         setTimeout(() => {
           handleReply(this[kDispatches]);
-        }, delay2);
+        }, delay);
       } else {
         handleReply(this[kDispatches]);
       }
@@ -11055,10 +11055,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path2, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path2,
+            Path: path,
             "Status code": statusCode,
             Persistent: persist ? "\u2705" : "\u274C",
             Invocations: timesInvoked,
@@ -15680,8 +15680,8 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path2) {
-      for (const char of path2) {
+    function validateCookiePath(path) {
+      for (const char of path) {
         const code = char.charCodeAt(0);
         if (code < 33 || char === ";") {
           throw new Error("Invalid cookie path");
@@ -17373,11 +17373,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path2 = opts.path;
+          let path = opts.path;
           if (!opts.path.startsWith("/")) {
-            path2 = `/${path2}`;
+            path = `/${path}`;
           }
-          url = new URL(util.parseOrigin(url).origin + path2);
+          url = new URL(util.parseOrigin(url).origin + path);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -18609,7 +18609,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.toPlatformPath = exports2.toWin32Path = exports2.toPosixPath = void 0;
-    var path2 = __importStar(require("path"));
+    var path = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -18619,7 +18619,7 @@ var require_path_utils = __commonJS({
     }
     exports2.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path2.sep);
+      return pth.replace(/[/\\]/g, path.sep);
     }
     exports2.toPlatformPath = toPlatformPath;
   }
@@ -18690,7 +18690,7 @@ var require_core = __commonJS({
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
     var os = __importStar(require("os"));
-    var path2 = __importStar(require("path"));
+    var path = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -18718,7 +18718,7 @@ var require_core = __commonJS({
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path2.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
     exports2.addPath = addPath;
     function getInput2(name, options) {
@@ -18752,7 +18752,7 @@ var require_core = __commonJS({
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports2.getBooleanInput = getBooleanInput;
-    function setOutput2(name, value) {
+    function setOutput(name, value) {
       const filePath = process.env["GITHUB_OUTPUT"] || "";
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
@@ -18760,7 +18760,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       process.stdout.write(os.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
-    exports2.setOutput = setOutput2;
+    exports2.setOutput = setOutput;
     function setCommandEcho(enabled) {
       command_1.issue("echo", enabled ? "on" : "off");
     }
@@ -18866,8 +18866,6 @@ module.exports = __toCommonJS(action_exports);
 var core = __toESM(require_core());
 
 // utils/execShellCommand.ts
-var fs = __toESM(require("fs"));
-var path = __toESM(require("path"));
 var import_child_process = require("child_process");
 function execShellCommand(cmd, cwd) {
   return new Promise((resolve, reject) => {
@@ -18879,7 +18877,6 @@ function execShellCommand(cmd, cwd) {
       (error2, stdout, stderr) => {
         if (error2) {
           console.warn(error2);
-          reject(error2);
         }
         const output = stdout ? stdout : stderr;
         console.log(output);
@@ -18888,80 +18885,16 @@ function execShellCommand(cmd, cwd) {
     );
   });
 }
-function findPackageJson(currentPath) {
-  const packageJsonPath = path.join(currentPath, "package.json");
-  if (fs.existsSync(packageJsonPath)) {
-    return currentPath;
-  }
-  const parentDir = path.dirname(currentPath);
-  if (parentDir === currentPath) {
-    return null;
-  }
-  return findPackageJson(parentDir);
-}
-
-// utils/generateEnv.ts
-var import_fs = __toESM(require("fs"));
-function generateEnvFile(envFileName, envContent) {
-  try {
-    import_fs.default.writeFileSync(`${envFileName}.env`, envContent.trim());
-    console.log(".env file generated successfully!");
-  } catch (error2) {
-    console.error(`Error generating .env file: ${error2}`);
-  }
-}
-
-// utils/getSecretNames.ts
-var import_child_process2 = require("child_process");
-function runCommand(command, cwd) {
-  try {
-    const outputBuffer = (0, import_child_process2.execSync)(command, { cwd });
-    return outputBuffer.toString();
-  } catch (error2) {
-    console.error(`Error executing command: ${error2}`);
-    return null;
-  }
-}
-var getSecrets = () => {
-  const packageJsonPath = findPackageJson(__dirname);
-  if (!packageJsonPath)
-    return null;
-  const command = `vlt secrets`;
-  let output = runCommand(command, packageJsonPath);
-  if (!output) {
-    const command2 = `vlt secrets list`;
-    output = runCommand(command2, packageJsonPath);
-    if (!output)
-      return null;
-  }
-  return output;
-};
-var getSecretNames = () => {
-  const output = getSecrets();
-  if (!output)
-    return [];
-  const lines = output.split("\n");
-  const secretNames = lines.slice(1, lines.length).map((line) => {
-    const trimmedLine = line.trim();
-    const name = trimmedLine.split(/ /g)[0];
-    return name;
-  });
-  const filteredNames = secretNames.filter((name) => name);
-  return filteredNames;
-};
 
 // action/index.ts
-function delay(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
 var getInputs = () => {
   core.info("Getting Inputs");
   const clientId = core.getInput("CLIENT_ID");
   const clientSecret = core.getInput("CLIENT_SECRET");
   const projectName = core.getInput("PROJECT_NAME");
   const appName = core.getInput("APP_NAME");
-  const secretsNames = JSON.parse(core.getInput("SECRET_NAMES"));
-  const generateEnv = core.getInput("GENERATE_ENV");
+  const secretsNames = JSON.parse(core.getInput("SECRETS_NAMES"));
+  const generateEnv = new Boolean(core.getInput("GENERATE_ENV"));
   core.info("Inputs Parsed");
   return {
     clientId,
@@ -18976,16 +18909,14 @@ var installHashiCorp = async () => {
   core.info("Installing HashiCorp Vault");
   try {
     await execShellCommand("sudo apt update");
-    await execShellCommand("apt-get update && apt-get install -y lsb-release");
     await execShellCommand(
       "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
     );
     await execShellCommand(
-      `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
+      "echo 'deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main' | sudo tee /etc/apt/sources.list.d/hashicorp.list"
     );
-    await execShellCommand("sudo apt update");
-    await execShellCommand("sudo apt install vlt -y");
-    await execShellCommand("vlt --version");
+    await execShellCommand("sudo apt update && sudo apt install vlt -y");
+    await execShellCommand("vlt");
     core.info("HashiCorp Vault Installed");
   } catch (error2) {
     core.error(JSON.stringify(error2));
@@ -19001,49 +18932,6 @@ var authenticateHashiCorp = async (clientId, clientSecret) => {
     core.error(JSON.stringify(error2));
   }
 };
-var generateSecretsMap = () => {
-  const secretsList = getSecretNames();
-  const secretsMap = Object.assign(
-    {},
-    ...secretsList.map((name) => ({ [name]: null }))
-  );
-  core.info("Secrets Map Generated");
-  return secretsMap;
-};
-var extractSecrets = async (secretNames) => {
-  const secretsMap = generateSecretsMap();
-  const contentArrPromise = [];
-  for (let name of secretNames) {
-    await delay(200);
-    const getSecret = async () => {
-      if (!(name in secretsMap))
-        return null;
-      const value = runCommand(`vlt secrets get --plaintext ${name}`);
-      if (!value)
-        return null;
-      return [
-        { [name]: value.replace("\n", "") },
-        name + `="${value.replace("\n", "")}"
-`
-      ];
-    };
-    contentArrPromise.push(getSecret());
-  }
-  const contentArr = await Promise.all(contentArrPromise);
-  contentArr.forEach((val, idx) => {
-    if (!val)
-      core.info(`Error getting secret ${secretNames[idx]}`);
-  });
-  const filteredContentArr = contentArr.filter((val) => val);
-  if (filteredContentArr.length === 0)
-    return ["", {}];
-  const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
-  const lineMap = filteredContentArr.reduce(
-    (a, b) => ({ ...a[0], ...b[0] }),
-    {}
-  );
-  return [content, lineMap];
-};
 var main = async () => {
   await installHashiCorp();
   const inputs = getInputs();
@@ -19056,12 +18944,6 @@ var main = async () => {
     generateEnv
   } = inputs;
   await authenticateHashiCorp(clientId, clientSecret);
-  const [content, output] = await extractSecrets(secretsNames);
-  if (generateEnv)
-    generateEnvFile(generateEnv, content);
-  await execShellCommand("vlt logout");
-  core.info("Finished secrets generation");
-  core.setOutput("secrets", output);
 };
 main();
 // Annotate the CommonJS export names for ESM import in node:
