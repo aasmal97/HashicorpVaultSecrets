@@ -18858,6 +18858,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 var action_exports = {};
 __export(action_exports, {
   authenticateHashiCorp: () => authenticateHashiCorp,
+  extractSecrets: () => extractSecrets,
   getInputs: () => getInputs,
   installHashiCorp: () => installHashiCorp,
   main: () => main
@@ -19067,6 +19068,7 @@ main();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   authenticateHashiCorp,
+  extractSecrets,
   getInputs,
   installHashiCorp,
   main

@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import { execShellCommand } from "../utils/execShellCommand";
 import { generateEnvFile } from "../utils/generateEnv";
 import { getSecretNames, runCommand } from "../utils/getSecretNames";
+import { HashiCorpAuthOptions } from "./types";
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -43,21 +44,8 @@ export const installHashiCorp = async () => {
     core.error(JSON.stringify(error));
   }
 };
-export const authenticateHashiCorp = async (
-  clientId: string,
-  clientSecret: string
-) => {
-  core.info("Attempting to Authenticate HashiCorp Vault");
-  try {
-    await execShellCommand(`export HCP_CLIENT_ID=${clientId}`);
-    await execShellCommand(`export HCP_CLIENT_SECRET=${clientSecret}`);
-    core.info("HashiCorp Vault Authenticated");
-  } catch (error) {
-    core.error(JSON.stringify(error));
-  }
-};
-const generateSecretsMap = () => {
-  const secretsList = getSecretNames();
+const generateSecretsMap = (auth: HashiCorpAuthOptions) => {
+  const secretsList = getSecretNames(auth);
   const secretsMap = Object.assign(
     {},
     ...secretsList.map((name) => ({ [name]: null }))
@@ -66,9 +54,13 @@ const generateSecretsMap = () => {
   return secretsMap;
 };
 export const extractSecrets = async (
-  secretNames: string[]
+  secretNames: string[],
+  auth: {
+    clientId: string;
+    clientSecret: string;
+  }
 ): Promise<[string, { [key: string]: string }]> => {
-  const secretsMap = generateSecretsMap();
+  const secretsMap = generateSecretsMap(auth);
   const contentArrPromise: Promise<
     [{ [key: string]: string }, string] | null
   >[] = [];
@@ -79,7 +71,12 @@ export const extractSecrets = async (
     > => {
       if (!(name in secretsMap)) return null;
       //we have this delay so we don't exceed our rate limit of 5-10 requests per second
-      const value = runCommand(`vlt secrets get --plaintext ${name}`);
+      const value = runCommand(`vlt secrets get --plaintext ${name}`, {
+        env: {
+          HCP_CLIENT_ID: auth.clientId,
+          HCP_CLIENT_SECRET: auth.clientSecret,
+        },
+      });
       if (!value) return null;
       return [
         { [name]: value.replace("\n", "") },
@@ -116,12 +113,11 @@ export const main = async () => {
     secretsNames,
     generateEnv,
   } = inputs;
-  await authenticateHashiCorp(clientId, clientSecret);
-  
-  const [content, output] = await extractSecrets(secretsNames);
+  const [content, output] = await extractSecrets(secretsNames, {
+    clientId,
+    clientSecret,
+  });
   if (generateEnv) generateEnvFile(generateEnv, content);
-  //remove credential access
-  await execShellCommand("vlt logout");
   core.info("Finished secrets generation");
   core.setOutput("secrets", output);
 };

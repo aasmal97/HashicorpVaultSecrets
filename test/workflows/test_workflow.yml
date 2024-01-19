@@ -11,3 +11,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Test HashiCorp Vault Secrets Script"
         uses: ./
+        with: 
+          CLIENT_ID: ${{secrets.CLIENT_ID}}
+          CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+          APP_NAME: ${{secrets.APP_NAME}}
+          PROJECT_NAME: ${{secrets.PROJECT_NAME}}
+          SECRET_NAMES: '["VERCEL_ORG_ID", "VERCEL_PROJECT_ID"]'
