@@ -17,3 +17,4 @@ jobs:
           APP_NAME: ${{secrets.APP_NAME}}
           PROJECT_NAME: ${{secrets.PROJECT_NAME}}
           SECRET_NAMES: ${{secrets.SECRET_NAMES}}
+          ORGANIZATION_NAME: ${{secrets.ORGANIZATION_NAME}}
