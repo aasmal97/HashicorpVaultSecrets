@@ -1,32 +1,11 @@
-import { execSync } from "child_process";
 import { findPackageJson } from "../../utils/execShellCommand";
+import { runCommand } from "./runCommand";
 import * as core from "@actions/core";
 import { HashiCorpAuthOptions, HashiCorpConfigOptions } from "../types";
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-export function runCommand(
-  command: string,
-  options?: {
-    cwd?: string;
-    env?: NodeJS.ProcessEnv;
-  }
-): string | null {
-  try {
-    // Run the command and store the output as a Buffer
-    const outputBuffer = execSync(command, {
-      cwd: options?.cwd,
-      env: options?.env,
-    });
-    // Convert the output Buffer to a string and return it
-    return outputBuffer.toString();
-  } catch (error: any) {
-    console.log(JSON.stringify(error.output[1].toString()));
-    // Handle any errors that occur during command execution
-    console.error(`Error executing command: ${error}`);
-    return null;
-  }
-}
+
 export const generateSecretsConfigCommand = (
   config: HashiCorpConfigOptions
 ) => {

@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import { generateEnvFile } from "../utils/generateEnv";
 import { extractSecrets } from "./utils/getSecretNames";
+import { installHashiCorp } from "./utils/installHashiCorp";
 export const getInputs = () => {
   core.info("Getting Inputs");
   const clientId = core.getInput("CLIENT_ID");
@@ -33,6 +34,10 @@ export const main = async () => {
     generateEnv,
     organizationName,
   } = inputs;
+  installHashiCorp({
+    clientId,
+    clientSecret,
+  });
   const [content, output] = await extractSecrets({
     secretNames: secretsNames,
     config: {
@@ -45,6 +50,7 @@ export const main = async () => {
       clientSecret,
     },
   });
+
   if (generateEnv) generateEnvFile(generateEnv, content);
   core.info("Finished secrets generation");
   core.setOutput("secrets", output);

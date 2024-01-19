@@ -17754,12 +17754,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info2 = this._prepareRequest(verb, parsedUrl, headers);
+          let info4 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info2, data);
+            response = yield this.requestRaw(info4, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17769,7 +17769,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info2, data);
+                return authenticationHandler.handleAuthentication(this, info4, data);
               } else {
                 return response;
               }
@@ -17792,8 +17792,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info2, data);
+              info4 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info4, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17822,7 +17822,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info2, data) {
+      requestRaw(info4, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17834,7 +17834,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info2, data, callbackForResult);
+            this.requestRawWithCallback(info4, data, callbackForResult);
           });
         });
       }
@@ -17844,12 +17844,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info2, data, onResult) {
+      requestRawWithCallback(info4, data, onResult) {
         if (typeof data === "string") {
-          if (!info2.options.headers) {
-            info2.options.headers = {};
+          if (!info4.options.headers) {
+            info4.options.headers = {};
           }
-          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info4.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17858,7 +17858,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info2.httpModule.request(info2.options, (msg) => {
+        const req = info4.httpModule.request(info4.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17870,7 +17870,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info2.options.path}`));
+          handleResult(new Error(`Request timeout: ${info4.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17906,27 +17906,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info2 = {};
-        info2.parsedUrl = requestUrl;
-        const usingSsl = info2.parsedUrl.protocol === "https:";
-        info2.httpModule = usingSsl ? https : http;
+        const info4 = {};
+        info4.parsedUrl = requestUrl;
+        const usingSsl = info4.parsedUrl.protocol === "https:";
+        info4.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info2.options = {};
-        info2.options.host = info2.parsedUrl.hostname;
-        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
-        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
-        info2.options.method = method;
-        info2.options.headers = this._mergeHeaders(headers);
+        info4.options = {};
+        info4.options.host = info4.parsedUrl.hostname;
+        info4.options.port = info4.parsedUrl.port ? parseInt(info4.parsedUrl.port) : defaultPort;
+        info4.options.path = (info4.parsedUrl.pathname || "") + (info4.parsedUrl.search || "");
+        info4.options.method = method;
+        info4.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info2.options.headers["user-agent"] = this.userAgent;
+          info4.options.headers["user-agent"] = this.userAgent;
         }
-        info2.options.agent = this._getAgent(info2.parsedUrl);
+        info4.options.agent = this._getAgent(info4.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info2.options);
+            handler.prepareRequest(info4.options);
           }
         }
-        return info2;
+        return info4;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -18790,10 +18790,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.notice = notice;
-    function info2(message) {
+    function info4(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports2.info = info2;
+    exports2.info = info4;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -18857,49 +18857,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 // action/index.ts
 var action_exports = {};
 __export(action_exports, {
-  extractSecrets: () => extractSecrets,
   getInputs: () => getInputs,
-  installHashiCorp: () => installHashiCorp,
   main: () => main
 });
 module.exports = __toCommonJS(action_exports);
-var core = __toESM(require_core());
-
-// utils/execShellCommand.ts
-var fs = __toESM(require("fs"));
-var path = __toESM(require("path"));
-var import_child_process = require("child_process");
-function execShellCommand(cmd, options) {
-  return new Promise((resolve, reject) => {
-    (0, import_child_process.exec)(
-      cmd,
-      {
-        cwd: options?.cwd,
-        env: options?.env
-      },
-      (error2, stdout, stderr) => {
-        if (error2) {
-          console.warn(error2.message);
-          reject(error2.message);
-        }
-        const output = stdout ? stdout : stderr;
-        console.log(output);
-        resolve(output);
-      }
-    );
-  });
-}
-function findPackageJson(currentPath) {
-  const packageJsonPath = path.join(currentPath, "package.json");
-  if (fs.existsSync(packageJsonPath)) {
-    return currentPath;
-  }
-  const parentDir = path.dirname(currentPath);
-  if (parentDir === currentPath) {
-    return null;
-  }
-  return findPackageJson(parentDir);
-}
+var core3 = __toESM(require_core());
 
 // utils/generateEnv.ts
 var import_fs = __toESM(require("fs"));
@@ -18912,20 +18874,47 @@ function generateEnvFile(envFileName, envContent) {
   }
 }
 
-// utils/getSecretNames.ts
-var import_child_process2 = require("child_process");
+// utils/execShellCommand.ts
+var fs2 = __toESM(require("fs"));
+var path = __toESM(require("path"));
+function findPackageJson(currentPath) {
+  const packageJsonPath = path.join(currentPath, "package.json");
+  if (fs2.existsSync(packageJsonPath)) {
+    return currentPath;
+  }
+  const parentDir = path.dirname(currentPath);
+  if (parentDir === currentPath) {
+    return null;
+  }
+  return findPackageJson(parentDir);
+}
+
+// action/utils/runCommand.ts
+var import_child_process = require("child_process");
 function runCommand(command, options) {
   try {
-    const outputBuffer = (0, import_child_process2.execSync)(command, {
+    const outputBuffer = (0, import_child_process.execSync)(command, {
       cwd: options?.cwd,
-      env: options?.env
+      env: options?.env ? {
+        ...process.env,
+        ...options.env
+      } : process.env,
+      shell: "/bin/bash"
     });
-    return outputBuffer.toString();
+    const output = outputBuffer.toString();
+    console.log(output);
+    return output;
   } catch (error2) {
     console.log(JSON.stringify(error2.output[1].toString()));
     console.error(`Error executing command: ${error2}`);
     return null;
   }
+}
+
+// action/utils/getSecretNames.ts
+var core = __toESM(require_core());
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 var generateSecretsConfigCommand = (config) => {
   const argumentsArr = [];
@@ -18977,50 +18966,6 @@ var getSecretNames = (auth, config) => {
   });
   const filteredNames = secretNames.filter((name) => name);
   return filteredNames;
-};
-
-// action/index.ts
-function delay(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-var getInputs = () => {
-  core.info("Getting Inputs");
-  const clientId = core.getInput("CLIENT_ID");
-  const clientSecret = core.getInput("CLIENT_SECRET");
-  const organizationName = core.getInput("ORGANIZATION_NAME");
-  const projectName = core.getInput("PROJECT_NAME");
-  const appName = core.getInput("APP_NAME");
-  const secretsNames = JSON.parse(core.getInput("SECRET_NAMES"));
-  const generateEnv = core.getInput("GENERATE_ENV");
-  core.info("Inputs Parsed");
-  return {
-    clientId,
-    clientSecret,
-    projectName,
-    appName,
-    secretsNames,
-    generateEnv,
-    organizationName
-  };
-};
-var installHashiCorp = async () => {
-  core.info("Installing HashiCorp Vault");
-  try {
-    await execShellCommand("sudo apt update");
-    await execShellCommand("apt-get update && apt-get install -y lsb-release");
-    await execShellCommand(
-      "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
-    );
-    await execShellCommand(
-      `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`
-    );
-    await execShellCommand("sudo apt update");
-    await execShellCommand("sudo apt install vlt -y");
-    await execShellCommand("vlt --version");
-    core.info("HashiCorp Vault Installed");
-  } catch (error2) {
-    core.error(JSON.stringify(error2));
-  }
 };
 var generateSecretsMap = ({
   auth,
@@ -19076,13 +19021,65 @@ var extractSecrets = async ({
     return ["", {}];
   const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
   const lineMap = filteredContentArr.reduce(
-    (a, b) => ({ ...a[0], ...b[0] }),
+    (a, b) => ({ ...a, ...b[0] }),
     {}
   );
   return [content, lineMap];
 };
+
+// action/utils/installHashiCorp.ts
+var core2 = __toESM(require_core());
+var installHashiCorpCommands = [
+  "sudo apt update",
+  //install lsb-release
+  "apt-get update && apt-get install -y lsb-release",
+  //retrive key
+  "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg",
+  //install vlt
+  `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`,
+  "sudo apt update",
+  "sudo apt install vlt -y",
+  "vlt --version",
+  "ls",
+  "env"
+];
+var installHashiCorp = (auth) => {
+  core2.info("Installing HashiCorp Vault");
+  try {
+    runCommand(installHashiCorpCommands.join(";"), {
+      env: {
+        HCP_CLIENT_ID: auth.clientId,
+        HCP_CLIENT_SECRET: auth.clientSecret
+      }
+    });
+    core2.info("HashiCorp Vault Installed");
+  } catch (error2) {
+    core2.error(JSON.stringify(error2));
+  }
+};
+
+// action/index.ts
+var getInputs = () => {
+  core3.info("Getting Inputs");
+  const clientId = core3.getInput("CLIENT_ID");
+  const clientSecret = core3.getInput("CLIENT_SECRET");
+  const organizationName = core3.getInput("ORGANIZATION_NAME");
+  const projectName = core3.getInput("PROJECT_NAME");
+  const appName = core3.getInput("APP_NAME");
+  const secretsNames = JSON.parse(core3.getInput("SECRET_NAMES"));
+  const generateEnv = core3.getInput("GENERATE_ENV");
+  core3.info("Inputs Parsed");
+  return {
+    clientId,
+    clientSecret,
+    projectName,
+    appName,
+    secretsNames,
+    generateEnv,
+    organizationName
+  };
+};
 var main = async () => {
-  await installHashiCorp();
   const inputs = getInputs();
   const {
     clientId,
@@ -19093,6 +19090,10 @@ var main = async () => {
     generateEnv,
     organizationName
   } = inputs;
+  installHashiCorp({
+    clientId,
+    clientSecret
+  });
   const [content, output] = await extractSecrets({
     secretNames: secretsNames,
     config: {
@@ -19107,15 +19108,13 @@ var main = async () => {
   });
   if (generateEnv)
     generateEnvFile(generateEnv, content);
-  core.info("Finished secrets generation");
-  core.setOutput("secrets", output);
+  core3.info("Finished secrets generation");
+  core3.setOutput("secrets", output);
 };
 main();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  extractSecrets,
   getInputs,
-  installHashiCorp,
   main
 });
 /*! Bundled license information:
