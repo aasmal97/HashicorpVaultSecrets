@@ -1,6 +1,6 @@
 name: HashiCorp Vault Secrets
 author: Arky Asmal
-description: Access HashiCorp Vault Secrets deployed on the HashiCorp Cloud Platform, with increased support and customization. This is not to be confused with a self-hosted Hashicorp Vault Instance, which already has a Github action.
+description: Access secrets stored on HashiCorp Vault Secrets, in the HashiCorp Cloud Platform.
 inputs: 
   CLIENT_ID: 
     default: '' 
