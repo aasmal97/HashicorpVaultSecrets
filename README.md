@@ -23,7 +23,7 @@ name: Hashicorp Vault Secrets
 id: hashicorp-vault-secrets
 uses: aasmal97/HashicorpVaultSecrets@v1.0.0
 with: 
-    CLIENT_ID: ${{ HASHICORP_CLIENT_ID }}
+    CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
     CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
     ORGANIZATION_NAME: 'example-org'
     PROJECT_NAME: 'example-project'
