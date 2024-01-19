@@ -10,7 +10,6 @@ const main = async () => {
   const testFilePath = path.join("test", "workflows", "test_workflow.yml");
   const secretsFilePath = path.join("test", "workflows", "my.secrets");
   const command = `act -W ${testFilePath} --secret-file ${secretsFilePath}`;
-  console.log(command);
   await execShellCommand(command, packageJsonPath);
 };
 if (require.main === module) main();

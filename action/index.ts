@@ -8,6 +8,7 @@ export const getInputs = () => {
   const appName = core.getInput("APP_NAME");
   const secretsNames = JSON.parse(core.getInput("SECRETS_NAMES")) as string[];
   const generateEnv = new Boolean(core.getInput("GENERATE_ENV"));
+  core.info("Inputs Parsed");
   return {
     clientId,
     clientSecret,
@@ -16,7 +17,6 @@ export const getInputs = () => {
     secretsNames,
     generateEnv,
   };
-  core.info("Inputs Parsed");
 };
 export const installHashiCorp = async () => {
   core.info("Installing HashiCorp Vault");
