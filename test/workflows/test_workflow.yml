@@ -1,0 +1,19 @@
+name: "Test Workflow"
+on: 
+  push:
+    branches:
+      - master
+      - main
+jobs:
+  Test-Workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Test HashiCorp Vault Secrets Script"
+        uses: ./
+        # with:
+        #   CLIENT_ID: ${{ secrets.Hello  }}
+        #   CLIENT_SECRET: ${{}}
+        #   PROJECT_NAME:
+        #   APP_NAME:
+        #   SECRET_NAMES:
+        #   GENERATE_ENV:
