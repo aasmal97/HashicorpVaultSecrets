@@ -18879,8 +18879,8 @@ function execShellCommand(cmd, options) {
       },
       (error2, stdout, stderr) => {
         if (error2) {
-          console.warn(error2);
-          reject(error2);
+          console.warn(error2.message);
+          reject(error2.message);
         }
         const output = stdout ? stdout : stderr;
         console.log(output);
@@ -18922,6 +18922,7 @@ function runCommand(command, options) {
     });
     return outputBuffer.toString();
   } catch (error2) {
+    console.log(JSON.stringify(error2.output[1].toString()));
     console.error(`Error executing command: ${error2}`);
     return null;
   }
@@ -18986,10 +18987,10 @@ var getInputs = () => {
   core.info("Getting Inputs");
   const clientId = core.getInput("CLIENT_ID");
   const clientSecret = core.getInput("CLIENT_SECRET");
+  const organizationName = core.getInput("ORGANIZATION_NAME");
   const projectName = core.getInput("PROJECT_NAME");
   const appName = core.getInput("APP_NAME");
   const secretsNames = JSON.parse(core.getInput("SECRET_NAMES"));
-  const organizationName = core.getInput("ORGANIZATION_NAME");
   const generateEnv = core.getInput("GENERATE_ENV");
   core.info("Inputs Parsed");
   return {

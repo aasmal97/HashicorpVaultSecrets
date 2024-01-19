@@ -11,6 +11,11 @@
       "*": ["node_modules/*"]
     }
   },
-  "include": ["scripts/**/*", "actions/**/*", "utils"],
+  "include": [
+    "scripts/**/*",
+    "actions/**/*",
+    "utils",
+    "action/utils/getSecretNames.ts"
+  ],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

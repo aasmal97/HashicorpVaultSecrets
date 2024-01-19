@@ -17,21 +17,14 @@ export function execShellCommand(
       },
       (error, stdout, stderr) => {
         if (error) {
-          console.warn(error);
-          reject(error);
+          console.warn(error.message);
+          reject(error.message);
         }
         const output = stdout ? stdout : stderr;
         console.log(output);
         resolve(output);
       }
     );
-  });
-}
-export function persistentShell(cwd?: string) {
-  const shellInstance = spawn(`echo "Persistent Shell Opened"`, { cwd: cwd });
-  shellInstance.stdin.write = (cmd: string) => shellInstance.stdin.write(cmd);
-  shellInstance.stdout.on("data", (data) => {
-    return data.toString();
   });
 }
 export function findPackageJson(currentPath: string): string | null {
