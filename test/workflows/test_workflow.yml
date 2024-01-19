@@ -21,7 +21,4 @@ jobs:
           GENERATE_ENV: test
       - name: "Test if env is present"
         shell: bash
-        run: |
-          if test -f /test.env; then
-            echo "File exists."
-          fi
+        run: ls
