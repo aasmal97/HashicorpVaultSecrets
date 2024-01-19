@@ -19090,13 +19090,13 @@ var main = async () => {
       clientSecret
     }
   });
-  if (generateEnv)
-    generateEnvFile(generateEnv, content);
   core3.info("Finished secrets generation");
   Object.keys(output).forEach((key) => {
     core3.setSecret(output[key]);
     core3.setOutput(key, output[key]);
   });
+  if (generateEnv)
+    generateEnvFile(generateEnv, content);
 };
 main();
 // Annotate the CommonJS export names for ESM import in node:

@@ -50,8 +50,6 @@ export const main = async () => {
       clientSecret,
     },
   });
-
-  if (generateEnv) generateEnvFile(generateEnv, content);
   core.info("Finished secrets generation");
   Object.keys(output).forEach((key) => {
     //mask the value
@@ -59,5 +57,6 @@ export const main = async () => {
     //set output
     core.setOutput(key, output[key]);
   });
+  if (generateEnv) generateEnvFile(generateEnv, content);
 };
 main();
