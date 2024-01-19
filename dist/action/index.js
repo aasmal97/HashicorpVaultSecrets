@@ -18857,7 +18857,6 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 // action/index.ts
 var action_exports = {};
 __export(action_exports, {
-  authenticateHashiCorp: () => authenticateHashiCorp,
   extractSecrets: () => extractSecrets,
   getInputs: () => getInputs,
   installHashiCorp: () => installHashiCorp,
@@ -18870,12 +18869,13 @@ var core = __toESM(require_core());
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
 var import_child_process = require("child_process");
-function execShellCommand(cmd, cwd) {
+function execShellCommand(cmd, options) {
   return new Promise((resolve, reject) => {
     (0, import_child_process.exec)(
       cmd,
       {
-        cwd
+        cwd: options?.cwd,
+        env: options?.env
       },
       (error2, stdout, stderr) => {
         if (error2) {
@@ -18914,31 +18914,46 @@ function generateEnvFile(envFileName, envContent) {
 
 // utils/getSecretNames.ts
 var import_child_process2 = require("child_process");
-function runCommand(command, cwd) {
+function runCommand(command, options) {
   try {
-    const outputBuffer = (0, import_child_process2.execSync)(command, { cwd });
+    const outputBuffer = (0, import_child_process2.execSync)(command, {
+      cwd: options?.cwd,
+      env: options?.env
+    });
     return outputBuffer.toString();
   } catch (error2) {
     console.error(`Error executing command: ${error2}`);
     return null;
   }
 }
-var getSecrets = () => {
+var getSecrets = (auth) => {
   const packageJsonPath = findPackageJson(__dirname);
   if (!packageJsonPath)
     return null;
   const command = `vlt secrets`;
-  let output = runCommand(command, packageJsonPath);
+  let output = runCommand(command, {
+    cwd: packageJsonPath,
+    env: {
+      HCP_CLIENT_ID: auth.clientId,
+      HCP_CLIENT_SECRET: auth.clientSecret
+    }
+  });
   if (!output) {
     const command2 = `vlt secrets list`;
-    output = runCommand(command2, packageJsonPath);
+    output = runCommand(command2, {
+      cwd: packageJsonPath,
+      env: {
+        HCP_CLIENT_ID: auth.clientId,
+        HCP_CLIENT_SECRET: auth.clientSecret
+      }
+    });
     if (!output)
       return null;
   }
   return output;
 };
-var getSecretNames = () => {
-  const output = getSecrets();
+var getSecretNames = (auth) => {
+  const output = getSecrets(auth);
   if (!output)
     return [];
   const lines = output.split("\n");
@@ -18992,18 +19007,8 @@ var installHashiCorp = async () => {
     core.error(JSON.stringify(error2));
   }
 };
-var authenticateHashiCorp = async (clientId, clientSecret) => {
-  core.info("Attempting to Authenticate HashiCorp Vault");
-  try {
-    await execShellCommand(`export HCP_CLIENT_ID=${clientId}`);
-    await execShellCommand(`export HCP_CLIENT_SECRET=${clientSecret}`);
-    core.info("HashiCorp Vault Authenticated");
-  } catch (error2) {
-    core.error(JSON.stringify(error2));
-  }
-};
-var generateSecretsMap = () => {
-  const secretsList = getSecretNames();
+var generateSecretsMap = (auth) => {
+  const secretsList = getSecretNames(auth);
   const secretsMap = Object.assign(
     {},
     ...secretsList.map((name) => ({ [name]: null }))
@@ -19011,15 +19016,20 @@ var generateSecretsMap = () => {
   core.info("Secrets Map Generated");
   return secretsMap;
 };
-var extractSecrets = async (secretNames) => {
-  const secretsMap = generateSecretsMap();
+var extractSecrets = async (secretNames, auth) => {
+  const secretsMap = generateSecretsMap(auth);
   const contentArrPromise = [];
   for (let name of secretNames) {
     await delay(200);
     const getSecret = async () => {
       if (!(name in secretsMap))
         return null;
-      const value = runCommand(`vlt secrets get --plaintext ${name}`);
+      const value = runCommand(`vlt secrets get --plaintext ${name}`, {
+        env: {
+          HCP_CLIENT_ID: auth.clientId,
+          HCP_CLIENT_SECRET: auth.clientSecret
+        }
+      });
       if (!value)
         return null;
       return [
@@ -19056,18 +19066,18 @@ var main = async () => {
     secretsNames,
     generateEnv
   } = inputs;
-  await authenticateHashiCorp(clientId, clientSecret);
-  const [content, output] = await extractSecrets(secretsNames);
+  const [content, output] = await extractSecrets(secretsNames, {
+    clientId,
+    clientSecret
+  });
   if (generateEnv)
     generateEnvFile(generateEnv, content);
-  await execShellCommand("vlt logout");
   core.info("Finished secrets generation");
   core.setOutput("secrets", output);
 };
 main();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  authenticateHashiCorp,
   extractSecrets,
   getInputs,
   installHashiCorp,

@@ -5,38 +5,93 @@ Currently, Hashicorp Vault Secrets has a direct one-click intergation that links
 However, as highlighted by their [documentation](https://developer.hashicorp.com/hcp/docs/vault-secrets/integrations/github-actions), there are severe limitations, like syncing secrets from a single HCP project, or syncing to a single organization with the repo. In addition, this integration requires the Hashicorp Vault Secrets App to be installed and configured in your repo, which may not be possible if the repo lives in an organization, and you are not an organization owner/admin. 
 
 This action provides a solution for the aforementioned problems, by using a service principal on your HashiCorp Organization account, to programmatically access Hashicorp Vault secrets in a Github action runner, and pass them into your workflows.
-## Using this Action
-### Running the Action
+## Configuring a Service Principal 
+### Requirements:
+- You must be using an HCP Vault Secrets App
+- You must be an HashiCorp Cloud Platform organization Admin or Owner
+
+### Steps:
+1. Go [here](https://portal.cloud.hashicorp.com/sign-in) and login
+2. Go to your organization
+3. Go to **Access Control IAM**. Go to **Service Principals** and create a service principal account
+##### Service Princpal Page Example
+![Example of Sevice Princpal Landing Page](./images/Service_Principal.png)
+## Action Usage
+### Quickstart 
 ```
 name: Hashicorp Vault Secrets
 id: hashicorp-vault-secrets
 uses: aasmal97/HashicorpVaultSecrets@v1.1
 with: 
-  CLIENT_ID: '${{ HASHICORP_CLIENT_ID }}'
-  CLIENT_SECRET: '${{ secrets.HASHICORP_CLIENT_SECRET }}'
-  PROJECT_NAME: 'example-project'
-  APP_NAME: 'ci-cd-pipeline-app'
+    CLIENT_ID: ${{ HASHICORP_CLIENT_ID }}
+    CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
+    ORGANIZATION_NAME: 'example-org'
+    PROJECT_NAME: 'example-project'
+    APP_NAME: 'ci-cd-pipeline-app'
+    SECRET_NAMES: '["EXAMPLE_ID"]'
 ```
-### Using the Action Output
-#### In a Github action job
+### Inputs: 
+- ##### CLIENT_ID: `string`
+  - This is the Organization Service Principal's generated CLIENT_ID acquired from your Hashicorp Portal.
+- ##### CLIENT_SECRET: `string` (required)
+   - This is the Organization Service Principal's generated CLIENT_SECRET acquired from your Hashicorp Portal.
+- ##### ORGANIZATION_NAME: `string` (required)
+   - This is the Organization ID or Name that the Service Principal was created on
+- ##### PROJECT_NAME: `string` (required)
+   - This is the project name that holds the apps where the secrets are stored
+- ##### APP_NAME: `string` (required)
+   - This is the app name, that holds the secrets 
+- ##### SECRET_NAMES: `string` (required)
+   - This is **JSON Stringified List** of the secret names you want to extract. 
+   - To ensure your list of variables have the correct syntax, pass your array/list through a JSON.stringifier and pass the resulting string in here. 
+   - Note: We use `JSON.parse` to parse this string into a list since GitHub Actions does not currently support a list input
+
+- ##### GENERATE_ENV: `string` (optional)
+   - The name of the `.env` file that you wish to generate.
+
+### Using Action Output
+#### In a Github Action job
 To use this action's output is subsequent workflow steps, ensure your `id` from the running action step, is the key to the subsquent step.
 ##### Example: 
 ```
 steps: 
 -   name: Hashicorp Vault Secrets
     id: hashicorp-vault-secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.1
+    uses: aasmal97/HashicorpVaultSecrets@v1.0
     with: 
-        CLIENT_ID: '${{ HASHICORP_CLIENT_ID }}'
-        CLIENT_SECRET: '${{ secrets.HASHICORP_CLIENT_SECRET }}'
+        CLIENT_ID: ${{ HASHICORP_CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
+        ORGANIZATION_NAME: 'example-org'
         PROJECT_NAME: 'example-project'
         APP_NAME: 'ci-cd-pipeline-app'
-        SECRET_NAMES: ["EXAMPLE_ID"]
+        SECRET_NAMES: '["EXAMPLE_ID"]'
 
 -   name: Example Step
     run: echo "The output value is ${{ steps.hashicorp-vault-secrets.outputs.secrets }}"
 ```
 #### Using a generated .env file 
+To use this, you must use the `GENERATE_ENV` input.
+```
+steps: 
+-   name: Hashicorp Vault Secrets
+    uses: aasmal97/HashicorpVaultSecrets@v1.0
+    with: 
+        CLIENT_ID: ${{ HASHICORP_CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
+        ORGANIZATION_NAME: 'example-org'
+        PROJECT_NAME: 'example-project'
+        APP_NAME: 'ci-cd-pipeline-app'
+        SECRET_NAMES: '["EXAMPLE_ID"]'
+        GENERATE_ENV: "example"
+
+- name: Check if example.env exists
+  shell: bash
+  run: |
+    if test -f /example.env; then
+       echo "File exists."
+    fi
+  
+```
 
 ## Contributing
 Anyone is welcome to contribute, simply open an issue or pull request. When opening an issue, ensure you can reproduce the issue, and list the steps you took to reproduce it.

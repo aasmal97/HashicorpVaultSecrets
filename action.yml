@@ -10,6 +10,10 @@ inputs:
     default: '' 
     description: Client Secret of the HashiCorp Cloud Service Principal/User
     required: true
+  ORGANIZATION_NAME:
+    default: '' 
+    description: Name of the HashiCorp Cloud Organization
+    required: true
   PROJECT_NAME:
     default: ''  
     description: Name of project deployed on HashiCorp Cloud Platform
