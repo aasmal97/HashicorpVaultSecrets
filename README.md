@@ -7,8 +7,8 @@ However, as highlighted by their [documentation](https://developer.hashicorp.com
 This action provides a solution for the aforementioned problems, by using a service principal on your HashiCorp Cloud Platform account, to programmatically access Hashicorp Vault secrets in a Github action runner, and pass them into your workflows.
 ## Configuring a Service Principal 
 ### Requirements:
-- You must be using an HCP Vault Secrets App
-- You must be an HashiCorp Cloud Platform organization Admin or Owner
+- You must be using a HCP Vault Secrets App
+- You must be a HashiCorp Cloud Platform organization Admin or Owner
 
 ### Steps:
 1. Go [here](https://portal.cloud.hashicorp.com/sign-in) and login
