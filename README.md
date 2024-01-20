@@ -103,7 +103,7 @@ Anyone is welcome to contribute, simply open an issue or pull request. When open
 To run the development environment, ensure the following are configured properly, and your are running the appropiate commands.  
 #### Requirements
 - [Docker](https://docs.docker.com/engine/install/) installed on your machine. It will provide the virtual environment needed to run a Github Action
-- [nektos/act](https://github.com/nektos/act) installed. This is the software that converts a Docker Environment into a Github Action Environment for testing 
+- [nektos/act](https://github.com/nektos/act) installed. This is the software that uses Docker to create a container, that resembles a Github Action Environment for testing 
 - Have a package manager installed (i.e, npm, yarn, etc)
 - Create a Hashicorp Cloud Platform Account
     1. Go [here](https://portal.cloud.hashicorp.com/sign-in) and create an account
