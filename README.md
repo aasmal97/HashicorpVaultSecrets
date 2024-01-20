@@ -20,7 +20,6 @@ This action provides a solution for the aforementioned problems, by using a serv
 ### Quickstart 
 ```
 name: Hashicorp Vault Secrets
-id: hashicorp-vault-secrets
 uses: aasmal97/HashicorpVaultSecrets@v1.0.0
 with: 
     CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
@@ -51,7 +50,7 @@ with:
 
 ### Using Action Output
 #### In a Github Action job
-To use this action's output is subsequent workflow steps, ensure your `id` from the running action step, is the key to the subsquent step.
+To use this action's output in subsequent workflow steps, ensure your `id` from the running action step, is the key to the subsquent step.
 ##### Example: 
 ```
 steps: 
