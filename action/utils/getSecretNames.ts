@@ -17,8 +17,6 @@ export const generateSecretsConfigCommand = (
   const command = argumentsArr.join(" ");
   return command;
 };
-//This function handles the two versions of this command
-// One has secrets, the other secrets list
 const getSecrets = (
   auth: HashiCorpAuthOptions,
   config: HashiCorpConfigOptions
@@ -82,12 +80,12 @@ export const extractSecrets = async ({
     [{ [key: string]: string }, string] | null
   >[] = [];
   for (let name of secretNames) {
+    //we have this delay so we don't exceed our rate limit of 5-10 requests per second
     await delay(200);
     const getSecret = async (): Promise<
       [{ [key: string]: string }, string] | null
     > => {
       if (!(name in secretsMap)) return null;
-      //we have this delay so we don't exceed our rate limit of 5-10 requests per second
       const value = runCommand(
         `vlt secrets get ${configCommand} --plaintext ${name}`,
         {
