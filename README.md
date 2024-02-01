@@ -2,7 +2,11 @@
 ## Introduction
 Currently, [Hashicorp Vault Secrets](https://developer.hashicorp.com/hcp/docs/vault-secrets) has a direct one-click intergation that links a Github Repo to an app of their choosing. 
 
-However, as highlighted by their [documentation](https://developer.hashicorp.com/hcp/docs/vault-secrets/integrations/github-actions), there are severe limitations, like syncing secrets from a single Hashicorp Cloud Platform project, or syncing to a single organization with the repo. In addition, this integration requires the Hashicorp Vault Secrets App to be installed and configured in your repo, which may not be possible if the repo lives in an organization, and you are not a Github organization owner/admin. 
+However, as highlighted by their [documentation](https://developer.hashicorp.com/hcp/docs/vault-secrets/integrations/github-actions), there are severe limitations. For example:
+1. You can only sync secrets from a single Hashicorp Cloud Platform project
+2. You can only sync a single organization with a repository. 
+3. This integration requires the Hashicorp Vault Secrets App to be installed and configured in your repository
+   - This is not possible if the repository lives in an organization and the user is not a Github organization owner/admin. 
 
 This action provides a solution for the aforementioned problems, by using a service principal on your HashiCorp Cloud Platform account, to programmatically access Hashicorp Vault secrets in a Github action runner, and pass them into your workflows.
 ## Configuring a Service Principal 
@@ -20,7 +24,7 @@ This action provides a solution for the aforementioned problems, by using a serv
 ### Quickstart 
 ```
 name: Hashicorp Vault Secrets
-uses: aasmal97/HashicorpVaultSecrets@v1.0.0
+uses: aasmal97/HashicorpVaultSecrets@v1.1.0
 with: 
     CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
     CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -56,7 +60,7 @@ To use this action's output in subsequent workflow steps, ensure your `id` from 
 steps: 
 -   name: Hashicorp Vault Secrets
     id: hashicorp-vault-secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.0.0
+    uses: aasmal97/HashicorpVaultSecrets@v1.1.0
     with: 
         CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
         CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -73,7 +77,7 @@ To use this, you must use the `GENERATE_ENV` input.
 ```
 steps: 
 -   name: Hashicorp Vault Secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.0.0
+    uses: aasmal97/HashicorpVaultSecrets@v1.1.0
     with: 
         CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
         CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -92,7 +96,7 @@ steps:
   
 ```
 ## Limitations
-- The service principal account must be configured at the **Organization Level**. This a limitation is imposed by Hashicorp themselves, and until this changes, there can't be support for more granular access (i.e service principal for only a project). 
+- The service principal account must be configured at the **Organization Level**. This limitation is imposed by Hashicorp themselves, and until this changes, there can't be support for more granular access (i.e service principal for only a project). 
 - The `SECRET_NAMES` must be a string since list inputs are not supported by Github Actions. In the future, this may be changed, when Github supports list inputs natively. 
 - This action can only run in **Linux**, and has been tested in ubuntu environments. It is not supported in darwin or mac. This is due primarily to ubuntu being the most common environment for Github action runners, but it is also due to my lack of hardware and time. However, in the future, support can be added if it is seen as a good or necessary feature. 
 ## Contributing
