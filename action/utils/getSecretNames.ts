@@ -113,7 +113,7 @@ export const extractSecrets = async ({
     string
   ][];
   if (filteredContentArr.length === 0) return ["", {}];
-  const content = filteredContentArr.reduce((a, b) => a[1] + b[1], "");
+  const content = filteredContentArr.reduce((a, b) => a + b[1], "");
   const lineMap = filteredContentArr.reduce((a, b) => ({ ...a, ...b[0] }), {});
   return [content, lineMap];
 };
