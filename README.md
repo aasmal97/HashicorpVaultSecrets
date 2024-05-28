@@ -111,7 +111,7 @@ To run the development environment, ensure the following are configured properly
 - Create a Hashicorp Cloud Platform Account
     1. Go [here](https://portal.cloud.hashicorp.com/sign-in) and create an account
     2. Create a dummy organization
-    3. Go an **Access Control IAM**. Go to **Service Principals** and create a dummy service principal account
+    3. Go to **Access Control IAM**, then go to **Service Principals** and create a dummy service principal account
         - **Save** the ***Client ID*** and ***Client Secret*** values in a `my.secrets` file in the following path `test/workflows/my.secrets`. `nektos/act` will use this to run the virtual github action.
         - Note: The `my.secrets` file follows the same form/syntax as a regular `.env` file.
     4. Create a dummy project in your organization
