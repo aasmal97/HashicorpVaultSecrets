@@ -65,17 +65,17 @@ const generateSecretsMap = ({
   core.info("Secrets Map Generated");
   return secretsMap;
 };
-export const extractSecrets = async ({
+const extractSecretsInList = async ({
   secretNames,
+  secretsMap,
   auth,
-  config,
+  configCommand,
 }: {
   secretNames: string[];
-  config: HashiCorpConfigOptions;
+  secretsMap: { [key: string]: string };
   auth: HashiCorpAuthOptions;
+  configCommand: string;
 }): Promise<[string, { [key: string]: string }]> => {
-  const secretsMap = generateSecretsMap({ config, auth });
-  const configCommand = generateSecretsConfigCommand(config);
   const contentArrPromise: Promise<
     [{ [key: string]: string }, string] | null
   >[] = [];
@@ -116,4 +116,27 @@ export const extractSecrets = async ({
   const content = filteredContentArr.reduce((a, b) => a + b[1], "");
   const lineMap = filteredContentArr.reduce((a, b) => ({ ...a, ...b[0] }), {});
   return [content, lineMap];
+};
+export const extractSecrets = async ({
+  secretNames,
+  auth,
+  config,
+  allSecrets,
+}: {
+  secretNames?: string[];
+  allSecrets?: boolean;
+  config: HashiCorpConfigOptions;
+  auth: HashiCorpAuthOptions;
+}): Promise<[string, { [key: string]: string }]> => {
+  const secretsMap = generateSecretsMap({ config, auth });
+  const configCommand = generateSecretsConfigCommand(config);
+  const currSecretNames = allSecrets
+    ? Object.keys(secretsMap)
+    : secretNames || [];
+  return await extractSecretsInList({
+    secretNames: currSecretNames,
+    secretsMap,
+    auth,
+    configCommand,
+  });
 };
