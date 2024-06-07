@@ -13,5 +13,20 @@ const main = async () => {
   await execShellCommand(command, {
     cwd: packageJsonPath,
   });
+  //test github action all secrets
+  const testFileAllSecretsPath = path.join(
+    "test",
+    "workflows",
+    "test_workflow_all_secrets.yml"
+  );
+  const secretsAllSecretsFilePath = path.join(
+    "test",
+    "workflows",
+    "my.secrets"
+  );
+  const allSecretsCommand = `act -W ${testFileAllSecretsPath} --secret-file ${secretsAllSecretsFilePath}`;
+  await execShellCommand(allSecretsCommand, {
+    cwd: packageJsonPath,
+  });
 };
 if (require.main === module) main();
