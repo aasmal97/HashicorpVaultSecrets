@@ -28,10 +28,14 @@ inputs:
   SECRET_NAMES: 
     default: "[]"
     description: a list of secret names, in an app using HashiCorp Vault Secrets
-    required: true
+    required: false
   GENERATE_ENV:
     default: ''
     description: The name of the .env file to be generated. If not set, no .env is generated. By default this is not set.
+    required: false
+  ALL_SECRETS: 
+    default: 'false'
+    description: If set to true, all secrets are retrieved, otherwise only the secrets specified in SECRET_NAMES are retrieved.
     required: false
 runs: 
   using: 'node20'
