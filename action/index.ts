@@ -36,7 +36,14 @@ export const ActionSchema = z.object({
     }),
   generateEnv: z
     .string({ invalid_type_error: "GENERATE_ENV must be a string" })
-    .optional(),
+    .optional()
+    .transform((val) => {
+      if (!val) return;
+      const hasExtension =
+        val.split(".").length >= 2;
+      if (hasExtension) return val;
+      else return `${val}.env`;
+    }),
   allSecrets: z
     .boolean()
     .or(z.string())
@@ -89,7 +96,7 @@ export const main = async () => {
     secretsNames,
     generateEnv,
     organizationName,
-    allSecrets
+    allSecrets,
   } = inputs;
   installHashiCorp({
     clientId,

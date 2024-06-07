@@ -17,5 +17,5 @@
     "utils",
     "action/utils/getSecretNames.ts"
   ],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts", "dist"]
 }

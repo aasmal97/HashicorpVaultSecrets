@@ -22930,7 +22930,7 @@ var core3 = __toESM(require_core());
 var import_fs = __toESM(require("fs"));
 function generateEnvFile(envFileName, envContent) {
   try {
-    import_fs.default.writeFileSync(`${envFileName}.env`, envContent.trim());
+    import_fs.default.writeFileSync(envFileName, envContent.trim());
     console.log(".env file generated successfully!");
   } catch (error2) {
     console.error(`Error generating .env file: ${error2}`);
@@ -23150,7 +23150,15 @@ var ActionSchema = import_zod.z.object({
       return JSON.parse(val);
     return val;
   }),
-  generateEnv: import_zod.z.string({ invalid_type_error: "GENERATE_ENV must be a string" }).optional(),
+  generateEnv: import_zod.z.string({ invalid_type_error: "GENERATE_ENV must be a string" }).optional().transform((val) => {
+    if (!val)
+      return;
+    const hasExtension = val.split(".").length >= 2;
+    if (hasExtension)
+      return val;
+    else
+      return `${val}.env`;
+  }),
   allSecrets: import_zod.z.boolean().or(import_zod.z.string()).optional().default(false).transform((val) => {
     if (typeof val === "boolean")
       return val;

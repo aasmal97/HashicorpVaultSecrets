@@ -51,8 +51,11 @@ with:
    - Note: We use `JSON.parse` to parse this string into a list since GitHub Actions does not currently support a list input
 
 - ##### GENERATE_ENV: `string` (optional)
-   - The name of the `.env` file that you wish to generate.
-
+   - The name of the `.env` file that you wish to generate. If your name contains a *`.`*, your provided name will become the file name of the `.env` file. If not, it will become the `{name} + .env`
+   
+      For example:
+      - `mysecrets.env.local` as the `GENERATE_ENV` value, becomes `mysecrets.env.local`. 
+      - `mysecrets` as the `GENERATE_ENV` value, becomes `mysecrets.env`
 - ##### ALL_SECRETS: `boolean` (optional)
    - If you want to grab all the secrets on the hashicorp vault secrets app, set this to `true`. By default, this is `false`. If this is set, you do not need to set `SECRET_NAMES`
 
@@ -89,7 +92,7 @@ steps:
         PROJECT_NAME: 'example-project'
         APP_NAME: 'ci-cd-pipeline-app'
         SECRET_NAMES: '["EXAMPLE_ID"]'
-        GENERATE_ENV: "example"
+        GENERATE_ENV: "example.env"
 
 - name: Check if example.env exists
   shell: bash

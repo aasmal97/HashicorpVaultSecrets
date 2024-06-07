@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: "Test HashiCorp Vault Secrets ALL_SECRETS"
+      - name: "Test HashiCorp Vault GENERATE_ENV"
         uses: ./
         with: 
           CLIENT_ID: ${{secrets.CLIENT_ID}}
@@ -17,7 +17,7 @@ jobs:
           APP_NAME: ${{secrets.APP_NAME}}
           PROJECT_NAME: ${{secrets.PROJECT_NAME}}
           ORGANIZATION_NAME: ${{secrets.ORGANIZATION_NAME}}
-          GENERATE_ENV: test
+          GENERATE_ENV: test.env.local
           ALL_SECRETS: true 
       - name: "Test if env is present"
         shell: bash
