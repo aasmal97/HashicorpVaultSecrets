@@ -97,7 +97,24 @@ steps:
     if test -f /example.env; then
        echo "File exists."
     fi
-  
+```
+
+#### Load all secrets in Vault Secrets App
+```yaml
+steps: 
+-   name: Hashicorp Vault Secrets
+    id: hashicorp-vault-secrets
+    uses: aasmal97/HashicorpVaultSecrets@v1.1.0
+    with: 
+        CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
+        ORGANIZATION_NAME: 'example-org'
+        PROJECT_NAME: 'example-project'
+        APP_NAME: 'ci-cd-pipeline-app'
+        ALL_SECRETS: true
+
+-   name: Example Step
+    run: echo "The output value is ${{ steps.hashicorp-vault-secrets.outputs.EXAMPLE_ID }}"
 ```
 ## Limitations
 - The service principal account must be configured at the **Organization Level**. This limitation is imposed by Hashicorp themselves, and until this changes, there can't be support for more granular access (i.e service principal for only a project). 
