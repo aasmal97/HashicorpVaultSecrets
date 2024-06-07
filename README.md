@@ -22,7 +22,7 @@ This action provides a solution for the aforementioned problems, by using a serv
 ![Example of Sevice Princpal Landing Page](./images/Service_Principal.png)
 ## Action Usage
 ### Quickstart 
-```
+```yaml
 name: Hashicorp Vault Secrets
 uses: aasmal97/HashicorpVaultSecrets@v1.1.0
 with: 
@@ -34,7 +34,7 @@ with:
     SECRET_NAMES: '["EXAMPLE_ID"]'
 ```
 ### Inputs: 
-- ##### CLIENT_ID: `string`
+- ##### CLIENT_ID: `string` (required)
   - This is the Organization Service Principal's generated CLIENT_ID acquired from your Hashicorp Portal.
 - ##### CLIENT_SECRET: `string` (required)
    - This is the Organization Service Principal's generated CLIENT_SECRET acquired from your Hashicorp Portal.
@@ -44,7 +44,8 @@ with:
    - This is the project name that holds the apps where the secrets are stored
 - ##### APP_NAME: `string` (required)
    - This is the app name, that holds the secrets 
-- ##### SECRET_NAMES: `string` (required)
+
+- ##### SECRET_NAMES: `string` (optional)
    - This is **JSON Stringified List** of the secret names you want to extract. 
    - To ensure your list of variables have the correct syntax, pass your array/list through a JSON.stringifier and pass the resulting string in here. 
    - Note: We use `JSON.parse` to parse this string into a list since GitHub Actions does not currently support a list input
@@ -52,11 +53,14 @@ with:
 - ##### GENERATE_ENV: `string` (optional)
    - The name of the `.env` file that you wish to generate.
 
+- ##### ALL_SECRETS: `boolean` (optional)
+   - If you want to grab all the secrets on the hashicorp vault secrets app, set this to `true`. By default, this is `false`. If this is set, you do not need to set `SECRET_NAMES`
+
 ### Using Action Output
 #### In a Github Action job
 To use this action's output in subsequent workflow steps, ensure your `id` from the running action step, is the key to the subsquent step.
 ##### Example: 
-```
+```yaml
 steps: 
 -   name: Hashicorp Vault Secrets
     id: hashicorp-vault-secrets
@@ -74,7 +78,7 @@ steps:
 ```
 #### Using a generated .env file 
 To use this, you must use the `GENERATE_ENV` input.
-```
+```yaml
 steps: 
 -   name: Hashicorp Vault Secrets
     uses: aasmal97/HashicorpVaultSecrets@v1.1.0
