@@ -39,8 +39,7 @@ export const ActionSchema = z.object({
     .optional()
     .transform((val) => {
       if (!val) return;
-      const hasExtension =
-        val.split(".").length >= 2;
+      const hasExtension = val.split(".").length >= 2;
       if (hasExtension) return val;
       else return `${val}.env`;
     }),
