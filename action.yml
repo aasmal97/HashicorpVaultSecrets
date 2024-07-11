@@ -4,39 +4,39 @@ description: Access secrets stored on HashiCorp Vault Secrets, in the HashiCorp 
 branding:
   icon: "briefcase"
   color: "black"
-inputs: 
-  CLIENT_ID: 
-    default: '' 
+inputs:
+  CLIENT_ID:
+    default: ""
     description: Client ID of the HashiCorp Cloud Service Principal/User
     required: true
   CLIENT_SECRET:
-    default: '' 
+    default: ""
     description: Client Secret of the HashiCorp Cloud Service Principal/User
     required: true
-  ORGANIZATION_NAME:
-    default: '' 
-    description: Name of the HashiCorp Cloud Organization
+  ORGANIZATION_ID:
+    default: ""
+    description: ID of the HashiCorp Cloud Organization
     required: true
-  PROJECT_NAME:
-    default: ''  
-    description: Name of project deployed on HashiCorp Cloud Platform
+  PROJECT_ID:
+    default: ""
+    description: ID of project deployed on HashiCorp Cloud Platform
     required: true
-  APP_NAME: 
-    default: '' 
+  APP_NAME:
+    default: ""
     description: Name of app deployed on HashiCorp Cloud Platform, using HashiCorp Vault Secrets
     required: true
-  SECRET_NAMES: 
+  SECRET_NAMES:
     default: "[]"
     description: a list of secret names, in an app using HashiCorp Vault Secrets
     required: false
   GENERATE_ENV:
-    default: ''
+    default: ""
     description: The name of the .env file to be generated. If not set, no .env is generated. By default this is not set.
     required: false
-  ALL_SECRETS: 
-    default: 'false'
+  ALL_SECRETS:
+    default: "false"
     description: If set to true, all secrets are retrieved, otherwise only the secrets specified in SECRET_NAMES are retrieved.
     required: false
-runs: 
-  using: 'node20'
-  main: 'dist/action/index.js'
+runs:
+  using: "node20"
+  main: "dist/action/index.js"

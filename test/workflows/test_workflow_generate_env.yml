@@ -1,5 +1,5 @@
 name: "Test Workflow"
-on: 
+on:
   push:
     branches:
       - master
@@ -11,14 +11,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Test HashiCorp Vault GENERATE_ENV"
         uses: ./
-        with: 
+        with:
           CLIENT_ID: ${{secrets.CLIENT_ID}}
           CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
           APP_NAME: ${{secrets.APP_NAME}}
-          PROJECT_NAME: ${{secrets.PROJECT_NAME}}
-          ORGANIZATION_NAME: ${{secrets.ORGANIZATION_NAME}}
+          PROJECT_ID: ${{secrets.PROJECT_ID}}
+          ORGANIZATION_ID: ${{secrets.ORGANIZATION_ID}}
           GENERATE_ENV: test.env.local
-          ALL_SECRETS: true 
+          ALL_SECRETS: true
       - name: "Test if env is present"
         shell: bash
         run: ls

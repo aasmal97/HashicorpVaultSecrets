@@ -4,11 +4,30 @@ export function runCommand(
   options?: {
     cwd?: string;
     env?: NodeJS.ProcessEnv;
+    requireAuth?: {
+      HCP_ORGANIZATION_ID: string;
+      HCP_PROJECT_ID: string;
+      HCP_CLIENT_ID: string;
+      HCP_CLIENT_SECRET: string;
+    };
   }
 ): string | null {
   try {
+    const commands = [command];
+    if (options && options.requireAuth) {
+      commands.unshift(
+        `hcp profile set project_id ${options.requireAuth.HCP_PROJECT_ID}`
+      );
+      commands.unshift(
+        `hcp profile set organization_id ${options.requireAuth.HCP_ORGANIZATION_ID}`
+      );
+      commands.unshift(
+        `hcp auth login --client-id ${options.requireAuth.HCP_CLIENT_ID} --client-secret ${options.requireAuth.HCP_CLIENT_SECRET}`
+      );
+    }
+    const allCommands = commands.join(";");
     // Run the command and store the output as a Buffer
-    const outputBuffer = execSync(command, {
+    const outputBuffer = execSync(allCommands, {
       cwd: options?.cwd,
       env: options?.env
         ? {

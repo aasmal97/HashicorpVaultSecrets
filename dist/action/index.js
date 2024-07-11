@@ -22956,7 +22956,20 @@ function findPackageJson(currentPath) {
 var import_child_process = require("child_process");
 function runCommand(command, options) {
   try {
-    const outputBuffer = (0, import_child_process.execSync)(command, {
+    const commands = [command];
+    if (options && options.requireAuth) {
+      commands.unshift(
+        `hcp profile set project_id ${options.requireAuth.HCP_PROJECT_ID}`
+      );
+      commands.unshift(
+        `hcp profile set organization_id ${options.requireAuth.HCP_ORGANIZATION_ID}`
+      );
+      commands.unshift(
+        `hcp auth login --client-id ${options.requireAuth.HCP_CLIENT_ID} --client-secret ${options.requireAuth.HCP_CLIENT_SECRET}`
+      );
+    }
+    const allCommands = commands.join(";");
+    const outputBuffer = (0, import_child_process.execSync)(allCommands, {
       cwd: options?.cwd,
       env: options?.env ? {
         ...process.env,
@@ -22980,12 +22993,8 @@ function delay(milliseconds) {
 }
 var generateSecretsConfigCommand = (config) => {
   const argumentsArr = [];
-  if (config.organizationName)
-    argumentsArr.push("--organization", config.organizationName);
-  if (config.projectName)
-    argumentsArr.push("--project", config.projectName);
   if (config.appName)
-    argumentsArr.push("--app-name", config.appName);
+    argumentsArr.push("--app", config.appName);
   const command = argumentsArr.join(" ");
   return command;
 };
@@ -22994,10 +23003,12 @@ var getSecrets = (auth, config) => {
   if (!packageJsonPath)
     return null;
   const configCommand = generateSecretsConfigCommand(config);
-  const command = `vlt secrets list ${configCommand}`;
-  const output = runCommand(command, {
+  const command = `hcp vault-secrets secrets list ${configCommand}`;
+  const output = runCommand(`${command}`, {
     cwd: packageJsonPath,
-    env: {
+    requireAuth: {
+      HCP_PROJECT_ID: config.projectName,
+      HCP_ORGANIZATION_ID: config.organizationName,
       HCP_CLIENT_ID: auth.clientId,
       HCP_CLIENT_SECRET: auth.clientSecret
     }
@@ -23035,6 +23046,7 @@ var extractSecretsInList = async ({
   secretNames,
   secretsMap,
   auth,
+  config,
   configCommand
 }) => {
   const contentArrPromise = [];
@@ -23044,9 +23056,11 @@ var extractSecretsInList = async ({
       if (!(name in secretsMap))
         return null;
       const value = runCommand(
-        `vlt secrets get ${configCommand} --plaintext ${name}`,
+        `hcp vault-secrets secrets open ${name} --format=json ${configCommand}`,
         {
-          env: {
+          requireAuth: {
+            HCP_PROJECT_ID: config.projectName,
+            HCP_ORGANIZATION_ID: config.organizationName,
             HCP_CLIENT_ID: auth.clientId,
             HCP_CLIENT_SECRET: auth.clientSecret
           }
@@ -23054,11 +23068,10 @@ var extractSecretsInList = async ({
       );
       if (!value)
         return null;
-      return [
-        { [name]: value.replace("\n", "") },
-        name + `="${value.replace("\n", "")}"
-`
-      ];
+      const secretsJson = JSON.parse(value);
+      const newValue = secretsJson.static_version?.value || secretsJson.auto_rotating?.value || secretsJson.auto_rotating_version?.value;
+      return [{ [name]: newValue }, name + `="${newValue}"
+`];
     };
     contentArrPromise.push(getSecret());
   }
@@ -23085,6 +23098,7 @@ var extractSecrets = async ({
   const currSecretNames = allSecrets ? Object.keys(secretsMap) : secretNames || [];
   return await extractSecretsInList({
     secretNames: currSecretNames,
+    config,
     secretsMap,
     auth,
     configCommand
@@ -23094,16 +23108,21 @@ var extractSecrets = async ({
 // action/utils/installHashiCorp.ts
 var core2 = __toESM(require_core());
 var installHashiCorpCommands = [
-  "sudo apt update",
-  //install lsb-release
-  "apt-get update && apt-get install -y lsb-release",
-  //retrive key
-  "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg",
-  //install vlt
+  // "sudo apt update",
+  // //install lsb-release
+  // "sudo apt-get update && apt-get install -y lsb-release",
+  // //retrive key
+  // "curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg",
+  // //install vlt
+  // `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`,
+  // "sudo apt update",
+  // "sudo apt install vlt -y",
+  // "vlt --version",
+  "sudo apt-get update &&   sudo apt-get install wget gpg coreutils",
+  "wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg",
   `echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list`,
-  "sudo apt update",
-  "sudo apt install vlt -y",
-  "vlt --version"
+  "sudo apt-get update && sudo apt-get install hcp",
+  "hcp version"
 ];
 var installHashiCorp = (auth) => {
   core2.info("Installing HashiCorp Vault");
@@ -23132,12 +23151,12 @@ var ActionSchema = import_zod.z.object({
     invalid_type_error: "CLIENT_SECRET must be a string"
   }),
   organizationName: import_zod.z.string({
-    required_error: "ORGANIZATION_NAME is required",
-    invalid_type_error: "ORGANIZATION_NAME must be a string"
+    required_error: "ORGANIZATION_ID is required",
+    invalid_type_error: "ORGANIZATION_ID must be a string"
   }),
   projectName: import_zod.z.string({
-    required_error: "PROJECT_NAME is required",
-    invalid_type_error: "PROJECT_NAME must be a string"
+    required_error: "PROJECT_ID is required",
+    invalid_type_error: "PROJECT_ID must be a string"
   }),
   appName: import_zod.z.string({
     required_error: "APP_NAME is required",
@@ -23171,8 +23190,8 @@ var getInputs = () => {
   core3.info("Getting Inputs");
   const clientId = core3.getInput("CLIENT_ID");
   const clientSecret = core3.getInput("CLIENT_SECRET");
-  const organizationName = core3.getInput("ORGANIZATION_NAME");
-  const projectName = core3.getInput("PROJECT_NAME");
+  const organizationName = core3.getInput("ORGANIZATION_ID");
+  const projectName = core3.getInput("PROJECT_ID");
   const appName = core3.getInput("APP_NAME");
   const secretsNames = core3.getInput("SECRET_NAMES");
   const generateEnv = core3.getInput("GENERATE_ENV");

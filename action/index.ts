@@ -13,12 +13,12 @@ export const ActionSchema = z.object({
     invalid_type_error: "CLIENT_SECRET must be a string",
   }),
   organizationName: z.string({
-    required_error: "ORGANIZATION_NAME is required",
-    invalid_type_error: "ORGANIZATION_NAME must be a string",
+    required_error: "ORGANIZATION_ID is required",
+    invalid_type_error: "ORGANIZATION_ID must be a string",
   }),
   projectName: z.string({
-    required_error: "PROJECT_NAME is required",
-    invalid_type_error: "PROJECT_NAME must be a string",
+    required_error: "PROJECT_ID is required",
+    invalid_type_error: "PROJECT_ID must be a string",
   }),
   appName: z.string({
     required_error: "APP_NAME is required",
@@ -59,8 +59,8 @@ export const getInputs = () => {
   core.info("Getting Inputs");
   const clientId = core.getInput("CLIENT_ID");
   const clientSecret = core.getInput("CLIENT_SECRET");
-  const organizationName = core.getInput("ORGANIZATION_NAME");
-  const projectName = core.getInput("PROJECT_NAME");
+  const organizationName = core.getInput("ORGANIZATION_ID");
+  const projectName = core.getInput("PROJECT_ID");
   const appName = core.getInput("APP_NAME");
   const secretsNames = core.getInput("SECRET_NAMES");
   const generateEnv = core.getInput("GENERATE_ENV");

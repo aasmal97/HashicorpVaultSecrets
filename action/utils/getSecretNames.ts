@@ -10,10 +10,7 @@ export const generateSecretsConfigCommand = (
   config: HashiCorpConfigOptions
 ) => {
   const argumentsArr = [];
-  if (config.organizationName)
-    argumentsArr.push("--organization", config.organizationName);
-  if (config.projectName) argumentsArr.push("--project", config.projectName);
-  if (config.appName) argumentsArr.push("--app-name", config.appName);
+  if (config.appName) argumentsArr.push("--app", config.appName);
   const command = argumentsArr.join(" ");
   return command;
 };
@@ -24,10 +21,12 @@ const getSecrets = (
   const packageJsonPath = findPackageJson(__dirname);
   if (!packageJsonPath) return null;
   const configCommand = generateSecretsConfigCommand(config);
-  const command = `vlt secrets list ${configCommand}`;
-  const output = runCommand(command, {
+  const command = `hcp vault-secrets secrets list ${configCommand}`;
+  const output = runCommand(`${command}`, {
     cwd: packageJsonPath,
-    env: {
+    requireAuth: {
+      HCP_PROJECT_ID: config.projectName,
+      HCP_ORGANIZATION_ID: config.organizationName,
       HCP_CLIENT_ID: auth.clientId,
       HCP_CLIENT_SECRET: auth.clientSecret,
     },
@@ -69,8 +68,10 @@ const extractSecretsInList = async ({
   secretNames,
   secretsMap,
   auth,
+  config,
   configCommand,
 }: {
+  config: HashiCorpConfigOptions;
   secretNames: string[];
   secretsMap: { [key: string]: string };
   auth: HashiCorpAuthOptions;
@@ -87,19 +88,23 @@ const extractSecretsInList = async ({
     > => {
       if (!(name in secretsMap)) return null;
       const value = runCommand(
-        `vlt secrets get ${configCommand} --plaintext ${name}`,
+        `hcp vault-secrets secrets open ${name} --format=json ${configCommand}`,
         {
-          env: {
+          requireAuth: {
+            HCP_PROJECT_ID: config.projectName,
+            HCP_ORGANIZATION_ID: config.organizationName,
             HCP_CLIENT_ID: auth.clientId,
             HCP_CLIENT_SECRET: auth.clientSecret,
           },
         }
       );
       if (!value) return null;
-      return [
-        { [name]: value.replace("\n", "") },
-        name + "=" + `"${value.replace("\n", "")}"\n`,
-      ];
+      const secretsJson = JSON.parse(value);
+      const newValue =
+        secretsJson.static_version?.value ||
+        secretsJson.auto_rotating?.value ||
+        secretsJson.auto_rotating_version?.value;
+      return [{ [name]: newValue }, name + "=" + `"${newValue}"\n`];
     };
     contentArrPromise.push(getSecret());
   }
@@ -135,6 +140,7 @@ export const extractSecrets = async ({
     : secretNames || [];
   return await extractSecretsInList({
     secretNames: currSecretNames,
+    config,
     secretsMap,
     auth,
     configCommand,
