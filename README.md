@@ -36,7 +36,7 @@ This action provides a solution for the aforementioned problems, by using a serv
 
 ```yaml
 name: Hashicorp Vault Secrets
-uses: aasmal97/HashicorpVaultSecrets@v1.2.0
+uses: aasmal97/HashicorpVaultSecrets@v2.0.0
 with:
   CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
   CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -90,7 +90,7 @@ To use this action's output in subsequent workflow steps, ensure your `id` from 
 steps:
   - name: Hashicorp Vault Secrets
     id: hashicorp-vault-secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.2.0
+    uses: aasmal97/HashicorpVaultSecrets@v2.0.0
     with:
       CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -110,7 +110,7 @@ To use this, you must use the `GENERATE_ENV` input.
 ```yaml
 steps:
   - name: Hashicorp Vault Secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.2.0
+    uses: aasmal97/HashicorpVaultSecrets@v2.0.0
     with:
       CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
@@ -134,7 +134,7 @@ steps:
 steps:
   - name: Hashicorp Vault Secrets
     id: hashicorp-vault-secrets
-    uses: aasmal97/HashicorpVaultSecrets@v1.2.0
+    uses: aasmal97/HashicorpVaultSecrets@v2.0.0
     with:
       CLIENT_ID: ${{ secrets.HASHICORP_CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.HASHICORP_CLIENT_SECRET }}
