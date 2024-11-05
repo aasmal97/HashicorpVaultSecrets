@@ -1,5 +1,8 @@
 # Hashicorp Vault Secrets Github Action
 
+<br/>
+<a href="https://www.buymeacoffee.com/arkyasmal" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
 ## Introduction
 
 Currently, [Hashicorp Vault Secrets](https://developer.hashicorp.com/hcp/docs/vault-secrets) has a direct one-click intergation that links a Github Repo to an app of their choosing.
