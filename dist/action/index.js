@@ -23003,7 +23003,7 @@ var getSecrets = (auth, config) => {
   if (!packageJsonPath)
     return null;
   const configCommand = generateSecretsConfigCommand(config);
-  const command = `hcp vault-secrets secrets list ${configCommand}`;
+  const command = `hcp vault-secrets secrets list --format=json ${configCommand}`;
   const output = runCommand(`${command}`, {
     cwd: packageJsonPath,
     requireAuth: {
@@ -23021,12 +23021,8 @@ var getSecretNames = (auth, config) => {
   const output = getSecrets(auth, config);
   if (!output)
     return [];
-  const lines = output.split("\n");
-  const secretNames = lines.slice(1, lines.length).map((line) => {
-    const trimmedLine = line.trim();
-    const name = trimmedLine.split(/ /g)[0];
-    return name;
-  });
+  const parsedOutput = JSON.parse(output);
+  const secretNames = parsedOutput.map((secret) => secret.name);
   const filteredNames = secretNames.filter((name) => name);
   return filteredNames;
 };

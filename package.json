@@ -1,6 +1,6 @@
 {
   "name": "hashicorp-vault-secrets-github-action",
-  "version": "1.2.0",
+  "version": "2.1.0",
   "description": "Access HashiCorp Vault Secrets deployed on the HashiCorp Cloud Platform, with increased support and customization. This is not to be confused with a self-hosted Hashicorp Vault Instance, which already has a Github action.",
   "main": "action.yml",
   "scripts": {
