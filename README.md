@@ -158,7 +158,7 @@ steps:
 
 ## Contributing
 
-Anyone is welcome to contribute, simply open an issue or pull request. When opening an issue, ensure you can reproduce the issue, and list the steps you took to reproduce it.
+Anyone is welcome to contribute, simply open an issue or pull request. When opening a bug issue/request, ensure you can reproduce the bug, and list the steps you took to reproduce it.
 
 ### Development Environment
 
