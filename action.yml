@@ -1,6 +1,6 @@
 name: HashiCorp Vault Secrets
 author: Arky Asmal
-description: Access secrets stored on HashiCorp Vault Secrets, in the HashiCorp Cloud Platform.
+description: Access secrets stored in HashiCorp Vault Secrets, on the HashiCorp Cloud Platform.
 branding:
   icon: "briefcase"
   color: "black"
